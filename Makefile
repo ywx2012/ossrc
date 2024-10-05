@@ -17,7 +17,7 @@ SRCS = main.c $(wildcard mm/*.c) $(wildcard lib/*.c) $(wildcard kernel/*.c) $(wi
 OBJS = $(SRCS:.c=.o)
 
 system.bin: head64.o kernel/handler.o $(OBJS)
-	ld -Ttext=0xffffffff80100000 head64.o kernel/handler.o $(OBJS) -o system.elf
+	ld -Ttext=0xffffffff80200000 head64.o kernel/handler.o $(OBJS) -o system.elf
 	objcopy -O binary system.elf $@
 
 .depend: $(SRCS)

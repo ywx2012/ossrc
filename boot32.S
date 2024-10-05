@@ -72,7 +72,7 @@ start32:
   btsl $0, %eax
   movl %eax, %cr0
  
-  ljmp $0x8, $0x100000 
+  ljmp $0x8, $0x200000
 
 gdt_start:
   .quad   0x0000000000000000
@@ -110,12 +110,12 @@ pt:
 
 # id map
 .org 0x33000
-  .quad 0x0000000000054003
+  .quad 0x0000000000032003
   .fill 511, 8, 0
 
-.org 0x34000
-  .quad 0x0000000000033003
-  .fill 511, 8, 0
+// .org 0x34000
+//  .quad 0x0000000000033003
+//  .fill 511, 8, 0
 
 ## linear map
 # pml3

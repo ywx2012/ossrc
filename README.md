@@ -13,3 +13,13 @@
 Tags下面放的是完全没有任何改动的纯净版原始源码。
 
 `main` 分支如无必要，不对原始代码进行任何改动。
+
+## 改动
+
+### 支持Linux/x86 Boot Protocol
+
+kvmtool支持一种独特的加载方式，当检测不出文件格式时，会把内核文件内容直接加载到0x10000处。原始代码只支持这一种加载方式，离开了kvmtool就无法运行。这里对原始代码进行了一些的改动，以便支持Linux/x86 Boot Protocol。这样就不会报Warning: Kernel image is not a bzImage了，也方便后续支持在QEMU下运行。
+
+因为Linux/x86 Boot Protocol会把保护模式代码加载到0x100000。因此需要把start32改到这个位置，同时因为在原始代码中这是start64所在位置，先把start64挪到0x200000。
+
+原始代码中，跳往start64时，并没有跳到0xffffffff80100000这个地址，而是跳到了0x100000。因此，在0x0和0xffffffff80000000开始的地址空间内都映射了内核。不知道出于什么原因，0x0处仅映射了2MB，而0xffffffff80000000处映射了KERNEL_PAGE_NUM页。为方便起见，这里就把原始代码 .org 0x33000 处第一项直接指向 pml2 。

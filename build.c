@@ -37,7 +37,7 @@ int main() {
   close(fd);
 
   // system.bin
-  lseek(fd_kernel, 0x100000 - 0x10000, SEEK_SET);
+  lseek(fd_kernel, 0x200000 - 0x10000, SEEK_SET);
   fd = open("system.bin", O_RDONLY);
   while (1) {
     c = read(fd, buf, 512);
