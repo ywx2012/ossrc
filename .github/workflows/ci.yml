@@ -40,9 +40,11 @@ jobs:
     - name: Build
       run: make
 
-    - name: Run
+    - name: Run and take screenshot
       run: |
         Xvfb :0 -screen 0 640x480x24 &
         export DISPLAY=:0
         make run &
-        sleep 5
+        sleep 10
+        import -window root /tmp/screenshot.png
+        cat /tmp/screenshot.png | base64
