@@ -44,7 +44,16 @@ jobs:
       run: |
         Xvfb :0 -screen 0 640x480x24 &
         export DISPLAY=:0
+        sleep 5
         make run &
         sleep 10
-        import -window root /tmp/screenshot.png
+        import -window root png:- | convert - -fill white +opaque black /tmp/screenshot.png
         cat /tmp/screenshot.png | base64
+
+    - name: Make binary reference image
+      run: |
+        convert screenshot.png -fill white +opaque black /tmp/binary.png
+        cat /tmp/binary.png | base64
+
+    - name: Compare screenshot
+      run: diff <(convert /tmp/binary.png mono:-) <(convert /tmp/screenshot.png mono:-)
