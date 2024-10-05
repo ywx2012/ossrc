@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    - edited
+
+jobs:
+  kvmtool:
+    runs-on: 'ubuntu-latest'
+    steps:
+
+    - name: Install packages
+      run: |
+        sudo apt-get update
+        sudo apt-get --no-install-recommends install libsdl1.2-compat-dev
+
+    - name: Build kvmtool
+      run: |
+        git clone git://git.kernel.org/pub/scm/linux/kernel/git/will/kvmtool.git ~/kvmtool
+        pushd .
+        cd ~/kvmtool
+        make
+        popd
