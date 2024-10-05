@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    - edited
+
+jobs:
+  kvmtool:
+    runs-on: 'ubuntu-latest'
+    steps:
+
+    # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+    - name: Enable KVM group perms
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: Install packages
+      run: |
+        sudo apt-get update
+        sudo apt-get --no-install-recommends install libsdl1.2-compat-dev xvfb
+
+    - name: Build kvmtool
+      run: |
+        git clone git://git.kernel.org/pub/scm/linux/kernel/git/will/kvmtool.git ~/kvmtool
+        pushd .
+        cd ~/kvmtool
+        make
+        popd
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Build
+      run: make
+
+    - name: Run and take screenshot
+      run: |
+        Xvfb :0 -screen 0 640x480x24 &
+        export DISPLAY=:0
+        sleep 5
+        make run &
+        sleep 10
+        import -window root png:- | convert - -fill white +opaque black /tmp/screenshot.png
+        cat /tmp/screenshot.png | base64
+
+    - name: Make binary reference image
+      run: |
+        convert screenshot.png -fill white +opaque black /tmp/binary.png
+        cat /tmp/binary.png | base64
+
+    - name: Compare screenshot
+      run: diff <(convert /tmp/binary.png mono:-) <(convert /tmp/screenshot.png mono:-)
