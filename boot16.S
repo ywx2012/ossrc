@@ -48,7 +48,7 @@ e820_rd_entry:
   or $0x1, %eax
   mov %eax, %cr0
 
-  ljmpl $0x8, $0x20000  
+  ljmpl $0x8, $0x100000
 
 gdtr:
   .word gdt_end - gdt

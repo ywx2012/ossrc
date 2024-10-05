@@ -7,7 +7,7 @@ boot16.bin: boot16.o
 	objcopy -O binary boot16.elf boot16.bin
 
 boot32.bin: boot32.o
-	ld -Ttext=0x20000 boot32.o -o boot32.elf
+	ld -Ttext=0x100000 boot32.o -o boot32.elf
 	objcopy -O binary boot32.elf boot32.bin
 
 CFLAGS = -std=c11 -I. -fno-pic -mcmodel=kernel -fno-stack-protector -fcf-protection=none \

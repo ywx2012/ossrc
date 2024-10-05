@@ -24,7 +24,7 @@ int main() {
   close(fd);
  
   // boot32.bin
-  lseek(fd_kernel, 0x20000 - 0x10000, SEEK_SET);
+  lseek(fd_kernel, 0x100000 - 0x10000, SEEK_SET);
   fd = open("boot32.bin", O_RDONLY);
   while (1) {
     c = read(fd, buf, 512);
