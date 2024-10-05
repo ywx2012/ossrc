@@ -7,7 +7,7 @@ boot16.bin: boot16.o
 	objcopy -O binary boot16.elf boot16.bin
 
 boot32.bin: boot32.o
-	ld -Ttext=0x20000 boot32.o -o boot32.elf
+	ld -Ttext=0x100000 boot32.o -o boot32.elf
 	objcopy -O binary boot32.elf boot32.bin
 
 CFLAGS = -std=c11 -I. -fno-pic -mcmodel=kernel -fno-stack-protector -fcf-protection=none \
@@ -17,7 +17,7 @@ SRCS = main.c $(wildcard mm/*.c) $(wildcard lib/*.c) $(wildcard kernel/*.c) $(wi
 OBJS = $(SRCS:.c=.o)
 
 system.bin: head64.o kernel/handler.o $(OBJS)
-	ld -Ttext=0xffffffff80100000 head64.o kernel/handler.o $(OBJS) -o system.elf
+	ld -Ttext=0xffffffff80200000 head64.o kernel/handler.o $(OBJS) -o system.elf
 	objcopy -O binary system.elf $@
 
 .depend: $(SRCS)

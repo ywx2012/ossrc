@@ -17,7 +17,7 @@
 #define VA(x) ((void*)((unsigned long)(x) + PAGE_OFFSET))
 #define PA(x) ((unsigned long)(x) - PAGE_OFFSET)
 
-#define TASK0_PML4 0x30000
+#define TASK0_PML4 0x110000
 
 extern unsigned long mem_size;
 extern char pages[MAX_PAGES];

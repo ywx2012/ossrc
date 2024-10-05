@@ -14,36 +14,36 @@ start32:
   lgdt gdt
 
 # Setup kmap level 2
-  mov $0x32000, %edi
-  mov $0x33000 + 3, %eax
+  mov $0x112000, %edi
+  mov $0x113000 + 3, %eax
 1:
   stosl
   add $0x1000, %eax
   add $4, %edi
 
-  cmp $(0x32000 + 32 * 8 - 8), %edi
+  cmp $(0x112000 + 32 * 8 - 8), %edi
   jle 1b
 
 # Fill pt
-  mov $0x33000, %edi
+  mov $0x113000, %edi
   mov $0x0 + 3, %eax
 2:
   stosl
   add $0x1000, %eax
   add $4, %edi
 
-  cmp $(0x33000 + 512 * 32 * 8 - 8), %edi
+  cmp $(0x113000 + 512 * 32 * 8 - 8), %edi
   jle 2b
 
 # Setup direct-map level 2
-  mov $0x56000, %edi
-  mov $0x33000 + 3, %eax
+  mov $0x136000, %edi
+  mov $0x113000 + 3, %eax
 3:
   stosl
   add $0x1000, %eax
   add $4, %edi
 
-  cmp $(0x56000 + 32 * 8 - 8), %edi
+  cmp $(0x136000 + 32 * 8 - 8), %edi
   jle 3b
 
   # Enable PAE
@@ -52,7 +52,7 @@ start32:
   movl %eax, %cr4
 
   # Setup cr3
-  movl  $0x30000, %eax
+  movl  $0x110000, %eax
   movl  %eax, %cr3
 
   # Setup EFER
@@ -72,7 +72,7 @@ start32:
   btsl $0, %eax
   movl %eax, %cr0
  
-  ljmp $0x8, $0x100000 
+  ljmp $0x8, $0x200000
 
 gdt_start:
   .quad   0x0000000000000000
@@ -86,22 +86,21 @@ gdt:
 
 .org 0x10000
 pml4:
-  .quad 0x0000000000053003
+  .quad 0x0000000000133003
   .fill 272, 8, 0
-  .quad 0x0000000000055003
+  .quad 0x0000000000135003
   .fill 237, 8, 0
-  .quad 0x0000000000031003
+  .quad 0x0000000000111003
 
 .org 0x11000
 pml3:
   .fill 510, 8, 0
-  .quad 0x0000000000032003
+  .quad 0x0000000000112003
   .fill 1, 8, 0
 
 .org 0x12000
 pml2:
-	.quad 0x0000000000033003
-  .fill 511, 8, 0
+  .fill 512, 8, 0
 
 .org 0x13000
 #pml1
@@ -110,23 +109,23 @@ pt:
 
 # id map
 .org 0x33000
-  .quad 0x0000000000054003
+  .quad 0x00000000000112003
   .fill 511, 8, 0
 
-.org 0x34000
-  .quad 0x0000000000033003
-  .fill 511, 8, 0
+// .org 0x34000
+//  .quad 0x0000000000113003
+//  .fill 511, 8, 0
 
 ## linear map
 # pml3
 .org 0x35000
-  .quad 0x0000000000056003
+  .quad 0x0000000000136003
   .fill 511, 8, 0
 
 # pml2
 .org 0x36000
   .fill 32, 8, 0
-  .quad 0x0000000000057003
+  .quad 0x0000000000137003
   .fill 479, 8, 0
 
 # pml1
