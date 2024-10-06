@@ -47,21 +47,45 @@ kvmtool支持一种独特的加载方式，当检测不出文件格式时，会�
 :header-args: :mkdirp yes
 :END:
 
+objcopy跳过.note.开头的section。有些发行版默认打开，会导致system.bin无法生成。
+
+**** Alpine
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/alpine
+apk add make gcc musl-dev linux-headers
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/alpine
+apk add sdl12-compat-dev
+#+END_SRC
+
+运行会Segmentation fault，原因不明。
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/alpine
+apk add qemu-system-x86_64
+#+END_SRC
+
 **** Debian
 
-安装编译工具
+***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/debian
 apt-get --no-install-recommends install make gcc libc6-dev
 #+END_SRC
 
-安装编译kvmtool所需依赖
+***** 安装编译kvmtool所需依赖
 
 #+BEGIN_SRC sh :tangle tmp/kvmtool/debian
 apt-get --no-install-recommends install libsdl1.2-compat-dev
 #+END_SRC
 
-安装QEMU
+***** 安装QEMU
 
 #+BEGIN_SRC sh :tangle tmp/qemu/debian
 apt-get --no-install-recommends install qemu-system-x86
@@ -69,19 +93,19 @@ apt-get --no-install-recommends install qemu-system-x86
 
 **** Ubuntu
 
-安装编译工具
+***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/ubuntu
 apt-get --no-install-recommends install make gcc libc6-dev
 #+END_SRC
 
-安装编译kvmtool所需依赖
+***** 安装编译kvmtool所需依赖
 
 #+BEGIN_SRC sh :tangle tmp/kvmtool/ubuntu
 apt-get --no-install-recommends install libsdl1.2-compat-dev
 #+END_SRC
 
-安装QEMU
+***** 安装QEMU
 
 #+BEGIN_SRC sh :tangle tmp/qemu/ubuntu
 apt-get --no-install-recommends install qemu-system-x86

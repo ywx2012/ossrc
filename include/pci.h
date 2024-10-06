@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include <sys/pci.h>
+#include <linux/pci.h>
 
 #define PCI_ADDR(bus,slot,func) (((bus)<<8)|PCI_DEVFN((slot),(func)))
 
