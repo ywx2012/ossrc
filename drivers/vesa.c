@@ -2,6 +2,7 @@
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
 #include "include/vesa.h"
+#include "include/bochs.h"
 #include "include/string.h"
 #include "include/mm.h"
 #include "include/sched.h"
@@ -11,6 +12,9 @@ struct vesa_mode_info* vesa_mode_info;
 void vesa_init() {
   vesa_mode_info = malloc(sizeof(struct vesa_mode_info));
   memcpy(vesa_mode_info, (char*)0x14000, sizeof(struct vesa_mode_info));
+  if (vesa_mode_info->bpp != 0)
+    return;
+  bochs_init(vesa_mode_info);
 } 
 
 unsigned long do_get_mode_info(struct mode_info *mode_info) {

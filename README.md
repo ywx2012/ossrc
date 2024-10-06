@@ -31,3 +31,5 @@ kvmtool支持一种独特的加载方式，当检测不出文件格式时，会�
 ### 支持QEMU
 
 参考[INT 15H, E820H](https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/15_System_Address_Map_Interfaces/int-15h-e820h---query-system-address-map.html)，查询系统地址区间时需要设置EDX为0x0534D4150。原始代码漏了这行，倒也不影响在kvmtool上运行。
+
+因为QEMU不支持VESA，参考[VBE Display API](http://cvs.savannah.nongnu.org/viewvc/*checkout*/vgabios/vgabios/vbe_display_api.txt?revision=1.14)，改成[QEMU Standard VGA](https://www.qemu.org/docs/master/specs/standard-vga.html)获取framebuffer地址。并强制设置成640x480x32。
