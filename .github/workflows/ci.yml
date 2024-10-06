@@ -39,12 +39,14 @@ jobs:
 
         d["prelude"] = ' '.join(f"{k}_prelude='{v}'" for k, v in {
           "alpine": "apk add xvfb imagemagick bash",
+          "archlinux": "pacman -Sy xorg-server-xvfb imagemagick diffutils",
           "debian": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
           "ubuntu": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
         }.items())
 
         d["git"] = ' '.join(f"{k}_git='{v}'" for k, v in {
           "alpine": "apk add git",
+          "archlinux": "pacman -S git",
           "debian": "apt-get install git",
           "ubuntu": "apt-get install git",
         }.items())
@@ -70,6 +72,7 @@ jobs:
         - qemu
         distro:
         - {}
+        - name: archlinux
         - name: debian
         - name: ubuntu
         experimental:
@@ -113,6 +116,7 @@ jobs:
          *)
           export DEBIAN_FRONTEND=noninteractive
           alias apt-get="apt-get -y"
+          alias pacman="pacman --noconfirm"
           ;;
         esac
 
