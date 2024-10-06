@@ -41,6 +41,7 @@ jobs:
           "alpine": "apk add xvfb imagemagick bash",
           "alt": "apt-get update && apt-get install xorg-xvfb ImageMagick",
           "archlinux": "pacman -Sy xorg-server-xvfb imagemagick diffutils",
+          "centos": "dnf config-manager --enable crb && dnf install epel-release && dnf install --setopt=install_weak_deps=False xorg-x11-server-Xvfb ImageMagick diffutils",
           "debian": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
           "mageia": "dnf install --setopt=install_weak_deps=False x11-server-xvfb imagemagick diffutils",
           "opensuse": "zypper install --no-recommends tar gzip which xorg-x11-server-Xvfb ImageMagick",
@@ -52,6 +53,7 @@ jobs:
           "alt": "apt-get install git",
           "alpine": "apk add git",
           "archlinux": "pacman -S git",
+          "centos": "dnf install --setopt=install_weak_deps=False git",
           "debian": "apt-get install git",
           "mageia": "dnf install --setopt=install_weak_deps=False git",
           "opensuse": "zypper install --no-recommends git",
@@ -84,6 +86,9 @@ jobs:
         - name: alt
           container: alt:sisyphus
         - name: archlinux
+        - name: centos
+          container: quay.io/centos/centos:stream9
+          qemu: /usr/libexec/qemu-kvm
         - name: debian
         - name: mageia
         - name: opensuse
@@ -185,7 +190,7 @@ jobs:
         export DISPLAY=:0
         sleep 5
         exec 3<> <(cat)
-        qemu-system-x86_64 -net none -boot reboot-timeout=0 -action reboot=shutdown -chardev stdio,id=mon1 -mon chardev=mon1,mode=control -kernel kernel.bin <&3 &
+        ${{ matrix.distro.qemu || 'qemu-system-x86_64' }} -net none -boot reboot-timeout=0 -action reboot=shutdown -chardev stdio,id=mon1 -mon chardev=mon1,mode=control -kernel kernel.bin <&3 &
         sleep 30
         echo '{ "execute": "qmp_capabilities", "arguments": { } }' >&3
         echo '{ "execute": "screendump", "arguments": { "filename": "/tmp/screenshot.ppm" } }' >&3

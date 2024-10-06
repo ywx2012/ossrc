@@ -115,6 +115,26 @@ pacman -S sdl12-compat
 pacman -S qemu-system-x86
 #+END_SRC
 
+**** CentOS
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/centos
+dnf install --setopt=install_weak_deps=False make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/centos
+dnf install --setopt=install_weak_deps=False glibc-static sdl12-compat-devel
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/centos
+dnf install --setopt=install_weak_deps=False qemu-kvm
+#+END_SRC
+
 **** Debian
 
 ***** 安装编译工具
