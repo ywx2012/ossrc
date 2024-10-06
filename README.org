@@ -43,3 +43,26 @@ kvmtool支持一种独特的加载方式，当检测不出文件格式时，会�
 目前已能支持在Github Actions里运行起来，并通过截图对比。
 
 *** 支持在不同Linux发行版下编译运行
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+
+**** Ubuntu
+
+安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/ubuntu
+apt-get --no-install-recommends install make gcc libc6-dev
+#+END_SRC
+
+安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/ubuntu
+apt-get --no-install-recommends install libsdl1.2-compat-dev
+#+END_SRC
+
+安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/ubuntu
+apt-get --no-install-recommends install qemu-system-x86
+#+END_SRC

@@ -10,7 +10,55 @@ on:
     - edited
 
 jobs:
+  gen-scripts:
+    runs-on: 'ubuntu-latest'
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Generate Files
+      run: |
+        sudo apt-get install emacs
+        emacs --batch --eval "(progn (find-file \"README.org\") (let (org-confirm-babel-evaluate) (org-babel-tangle)))"
+
+    - name: Generate Scripts
+      id: gen
+      shell: python
+      run: |
+        import os
+        import json
+
+        def read_script(name,distro):
+           with open(f"tmp/{name}/{distro}") as f:
+             return f.read().strip()
+
+        d={}
+        for name in os.listdir("tmp"):
+            d[name] = ' '.join(f"{distro}_{name}='{read_script(name,distro)}'" for distro in os.listdir(f"tmp/{name}"))
+
+        d["prelude"] = ' '.join(f"{k}_prelude='{v}'" for k, v in {
+          "ubuntu": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
+        }.items())
+
+        d["git"] = ' '.join(f"{k}_git='{v}'" for k, v in {
+          "ubuntu": "apt-get install git",
+        }.items())
+
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            for name, value in d.items():
+                f.write(f"{name}={json.dumps(value)}\n")
+
+    outputs:
+      prelude: ${{ steps.gen.outputs.prelude }}
+      compile: ${{ steps.gen.outputs.compile }}
+      kvmtool: ${{ steps.gen.outputs.kvmtool }}
+      qemu: ${{ steps.gen.outputs.qemu }}
+      git: ${{ steps.gen.outputs.git }}
+
   run:
+    needs:
+    - gen-scripts
     strategy:
       matrix:
         runner:
@@ -24,6 +72,7 @@ jobs:
     container:
       image: ${{ matrix.distro.container || matrix.distro.name }}
       options: --device=/dev/kvm
+
     steps:
 
     - name: Checkout
@@ -40,25 +89,36 @@ jobs:
     - name: Install packages
       run: |
         case "${{ matrix.distro.name }}" in
-        "") SUDO=sudo ;;
-         *) SUDO=""
+        "")
+          shopt -s expand_aliases
+          alias apt-get="sudo apt-get -y"
+          ;;
+         *)
+          export DEBIAN_FRONTEND=noninteractive
+          alias apt-get="apt-get -y"
+          ;;
         esac
 
-        ${SUDO} apt-get update
-        ${SUDO} apt-get -y --no-install-recommends install xvfb imagemagick
+        alias ${{ fromJSON(needs.gen-scripts.outputs.prelude) }}
+        alias ${{ fromJSON(needs.gen-scripts.outputs.compile) }}
+        alias ${{ fromJSON(needs.gen-scripts.outputs.kvmtool) }}
+        alias ${{ fromJSON(needs.gen-scripts.outputs.git) }}
+        alias ${{ fromJSON(needs.gen-scripts.outputs.qemu) }}
 
-        ${SUDO} apt-get -y --no-install-recommends install make gcc libc6-dev
+        ${{ matrix.distro.name || 'ubuntu' }}_prelude
+        ${{ matrix.distro.name || 'ubuntu' }}_compile
 
         case "${{ matrix.runner }}" in
         "kvmtool")
-          ${SUDO} apt-get -y --no-install-recommends install git
-          ${SUDO} apt-get -y --no-install-recommends install libsdl1.2-compat-dev
+          ${{ matrix.distro.name || 'ubuntu' }}_git
+          ${{ matrix.distro.name || 'ubuntu' }}_kvmtool
+
           git clone git://git.kernel.org/pub/scm/linux/kernel/git/will/kvmtool.git ~/kvmtool
           cd ~/kvmtool
           make
         ;;
         "qemu")
-          ${SUDO} apt-get -y --no-install-recommends install qemu-system-x86
+          ${{ matrix.distro.name || 'ubuntu' }}_qemu
         ;;
         esac
 
