@@ -44,6 +44,7 @@ jobs:
           "mageia": "dnf install --setopt=install_weak_deps=False x11-server-xvfb imagemagick diffutils",
           "opensuse": "zypper install --no-recommends tar gzip which xorg-x11-server-Xvfb ImageMagick",
           "ubuntu": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
+          "void": "xbps-install -S libstdc++ libmount xorg-server-xvfb ImageMagick bash",
         }.items())
 
         d["git"] = ' '.join(f"{k}_git='{v}'" for k, v in {
@@ -53,6 +54,7 @@ jobs:
           "mageia": "dnf install --setopt=install_weak_deps=False git",
           "opensuse": "zypper install --no-recommends git",
           "ubuntu": "apt-get install git",
+          "void": "xbps-install -S git",
         }.items())
 
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
@@ -83,6 +85,8 @@ jobs:
         - name: opensuse
           container: registry.opensuse.org/opensuse/leap
         - name: ubuntu
+        - name: void
+          container: ghcr.io/void-linux/void-glibc-full
         experimental:
         - false
         include:
@@ -123,6 +127,7 @@ jobs:
           alias apt-get="apt-get -y"
           alias dnf="dnf -y"
           alias pacman="pacman --noconfirm"
+          alias xbps-install="xbps-install -y"
           alias zypper="zypper --non-interactive"
           ;;
         esac

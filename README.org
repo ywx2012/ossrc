@@ -51,6 +51,8 @@ objcopy跳过.note.开头的section。有些发行版默认打开，会导致sys
 
 删除 ~-fcf-protection=none~ ，因为有些发行版编译器不支持。
 
+有的发行版无法编译 ~push $main~ 这行，改为 ~pushq $main~
+
 **** Alpine
 
 ***** 安装编译工具
@@ -171,4 +173,24 @@ apt-get --no-install-recommends install libsdl1.2-compat-dev
 
 #+BEGIN_SRC sh :tangle tmp/qemu/ubuntu
 apt-get --no-install-recommends install qemu-system-x86
+#+END_SRC
+
+**** Void
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/void
+xbps-install -S make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/void
+xbps-install -S SDL-devel
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/void
+xbps-install -S qemu-system-amd64
 #+END_SRC

@@ -24,7 +24,7 @@ start64:
   // setup stack
   mov $task0_stack, %rsp
 
-  push $main
+  pushq $main
   ret
 
 gdt:
