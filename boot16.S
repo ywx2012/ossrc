@@ -103,6 +103,7 @@ start:
   cli
 
   # read e820
+  mov $0x0534D4150, %edx
   mov $e820_entry, %di
   xor %ebx, %ebx
 e820_rd_entry:
