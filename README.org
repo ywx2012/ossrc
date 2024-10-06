@@ -49,6 +49,8 @@ kvmtool支持一种独特的加载方式，当检测不出文件格式时，会�
 
 objcopy跳过.note.开头的section。有些发行版默认打开，会导致system.bin无法生成。
 
+删除 ~-fcf-protection=none~ ，因为有些发行版编译器不支持。
+
 **** Alpine
 
 ***** 安装编译工具
@@ -129,6 +131,26 @@ dnf install --setopt=install_weak_deps=False glibc-static-devel lib64SDL-devel
 
 #+BEGIN_SRC sh :tangle tmp/qemu/mageia
 dnf install --setopt=install_weak_deps=False qemu-system-x86-core
+#+END_SRC
+
+**** openSUSE
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/opensuse
+zypper install --no-recommends make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/opensuse
+zypper install --no-recommends libSDL-devel glibc-devel-static
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/opensuse
+zypper install --no-recommends qemu-x86
 #+END_SRC
 
 **** Ubuntu
