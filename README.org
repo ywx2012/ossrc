@@ -111,6 +111,26 @@ apt-get --no-install-recommends install libsdl1.2-compat-dev
 apt-get --no-install-recommends install qemu-system-x86
 #+END_SRC
 
+**** Mageia
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/mageia
+dnf install --setopt=install_weak_deps=False make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/mageia
+dnf install --setopt=install_weak_deps=False glibc-static-devel lib64SDL-devel
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/mageia
+dnf install --setopt=install_weak_deps=False qemu-system-x86-core
+#+END_SRC
+
 **** Ubuntu
 
 ***** 安装编译工具

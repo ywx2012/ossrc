@@ -41,6 +41,7 @@ jobs:
           "alpine": "apk add xvfb imagemagick bash",
           "archlinux": "pacman -Sy xorg-server-xvfb imagemagick diffutils",
           "debian": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
+          "mageia": "dnf install --setopt=install_weak_deps=False x11-server-xvfb imagemagick diffutils",
           "ubuntu": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
         }.items())
 
@@ -48,6 +49,7 @@ jobs:
           "alpine": "apk add git",
           "archlinux": "pacman -S git",
           "debian": "apt-get install git",
+          "mageia": "dnf install --setopt=install_weak_deps=False git",
           "ubuntu": "apt-get install git",
         }.items())
 
@@ -74,6 +76,7 @@ jobs:
         - {}
         - name: archlinux
         - name: debian
+        - name: mageia
         - name: ubuntu
         experimental:
         - false
@@ -116,6 +119,7 @@ jobs:
          *)
           export DEBIAN_FRONTEND=noninteractive
           alias apt-get="apt-get -y"
+          alias dnf="dnf -y"
           alias pacman="pacman --noconfirm"
           ;;
         esac
