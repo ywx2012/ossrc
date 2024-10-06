@@ -39,6 +39,7 @@ jobs:
 
         d["prelude"] = ' '.join(f"{k}_prelude='{v}'" for k, v in {
           "alpine": "apk add xvfb imagemagick bash",
+          "alt": "apt-get update && apt-get install xorg-xvfb ImageMagick",
           "archlinux": "pacman -Sy xorg-server-xvfb imagemagick diffutils",
           "debian": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
           "mageia": "dnf install --setopt=install_weak_deps=False x11-server-xvfb imagemagick diffutils",
@@ -48,6 +49,7 @@ jobs:
         }.items())
 
         d["git"] = ' '.join(f"{k}_git='{v}'" for k, v in {
+          "alt": "apt-get install git",
           "alpine": "apk add git",
           "archlinux": "pacman -S git",
           "debian": "apt-get install git",
@@ -79,6 +81,8 @@ jobs:
         - qemu
         distro:
         - {}
+        - name: alt
+          container: alt:sisyphus
         - name: archlinux
         - name: debian
         - name: mageia
@@ -180,14 +184,13 @@ jobs:
         Xvfb :0 -screen 0 640x480x24 &
         export DISPLAY=:0
         sleep 5
-        qemu-system-x86_64 -net none -boot reboot-timeout=0 -action reboot=shutdown -qmp tcp:127.0.0.1:4444,server=on,wait=off -kernel kernel.bin &
+        exec 3<> <(cat)
+        qemu-system-x86_64 -net none -boot reboot-timeout=0 -action reboot=shutdown -chardev stdio,id=mon1 -mon chardev=mon1,mode=control -kernel kernel.bin <&3 &
         sleep 30
-        exec 3<>/dev/tcp/127.0.0.1/4444
         echo '{ "execute": "qmp_capabilities", "arguments": { } }' >&3
         echo '{ "execute": "screendump", "arguments": { "filename": "/tmp/screenshot.ppm" } }' >&3
         sleep 2
         echo '{ "execute": "quit" }' >&3
-        cat <&3 || echo 'QEMU QUIT'
         convert /tmp/screenshot.ppm -fill white +opaque black /tmp/screenshot.png
         base64 /tmp/screenshot.png
 
