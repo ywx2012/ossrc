@@ -38,10 +38,12 @@ jobs:
             d[name] = ' '.join(f"{distro}_{name}='{read_script(name,distro)}'" for distro in os.listdir(f"tmp/{name}"))
 
         d["prelude"] = ' '.join(f"{k}_prelude='{v}'" for k, v in {
+          "debian": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
           "ubuntu": "apt-get update && apt-get install --no-install-recommends xvfb imagemagick",
         }.items())
 
         d["git"] = ' '.join(f"{k}_git='{v}'" for k, v in {
+          "debian": "apt-get install git",
           "ubuntu": "apt-get install git",
         }.items())
 
@@ -66,6 +68,7 @@ jobs:
         - qemu
         distro:
         - {}
+        - name: debian
         - name: ubuntu
 
     runs-on: 'ubuntu-latest'
