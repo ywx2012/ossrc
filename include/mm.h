@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "include/types.h"
+#include <stdint.h>
 
 #define E820MAX       32
 #define E820_RAM      1

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "include/types.h"
+#include <stdint.h>
 
 #define IO_BITMAP_BYTES (65536 / 8)
 

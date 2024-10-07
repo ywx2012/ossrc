@@ -2,7 +2,7 @@
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
 #include "include/vesa.h"
-#include "include/types.h"
+#include <stdint.h>
 
 #define BLUE 0xff0000
 #define GREEN 0xff00

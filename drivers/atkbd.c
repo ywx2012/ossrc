@@ -2,7 +2,7 @@
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
 #include <sys/io.h>
-#include "include/types.h"
+#include <stdint.h>
 #include "include/print.h"
 
 // scancode set 2

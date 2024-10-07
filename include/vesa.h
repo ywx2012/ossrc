@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "include/types.h"
+#include <stdint.h>
 
 struct mode_info {
   uint32_t fbbase;

@@ -1,7 +1,7 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include "include/types.h"
+#include <stdint.h>
 
 void* memset(void *s, char c, unsigned long n) {
   char *tmp = s;
