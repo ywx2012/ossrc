@@ -1,9 +1,9 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
+#include <string.h>
 #include "include/tss.h"
 #include "include/segment.h"
-#include "include/string.h"
 #include "include/sched.h"
 
 extern unsigned long gdt[64];

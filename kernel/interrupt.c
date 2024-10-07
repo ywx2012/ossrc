@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include <sys/io.h>
+#include <string.h>
 #include "include/interrupt.h"
-#include "include/string.h"
 #include "include/segment.h"
 
 #define COUNTER (1193181 / 100)

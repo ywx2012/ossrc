@@ -3,8 +3,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include "include/mm.h"
-#include "include/string.h"
 #include "include/sched.h"
 
 struct shm {

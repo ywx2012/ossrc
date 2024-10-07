@@ -1,9 +1,9 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
+#include <string.h>
 #include "include/print.h"
 #include "include/mm.h"
-#include "include/string.h"
 #include "include/sched.h"
 
 char pages[MAX_PAGES];
