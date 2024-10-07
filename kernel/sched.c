@@ -101,11 +101,13 @@ void schedule() {
 
   if (next != current) {
     __asm__ ("mov %%rsp, %0\n\t" /* save rsp */          \
-           "movq $1f, %1\n\t"  /* save rip */          \
+             "movabs $1f, %%rax\n\t"  /* save rip */     \
+             "mov %%rax, %1\n\t"                         \
            "mov %2, %%rsp\n\t" /* restore rsp */       \
            "push %3\n\t"       /* restore rip */       \
            : "=m"(current->rsp0), "=m"(current->rip)    \
            : "m"(next->rsp0), "m"(next->rip)  \
+             : "rax"
     );
 
     // switch kstack

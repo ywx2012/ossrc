@@ -37,13 +37,15 @@
 .endm
 
 system_call:
-  mov %rsp, tss + 20
-  mov tss + 4, %rsp
+  movabs $tss, %rbx
+  mov %rsp, 20(%rbx)
+  mov 4(%rbx), %rsp
 
-  pushq tss + 20
+  pushq 20(%rbx)
   SAVE_CONTEXT 0
 
-  call *syscall_table(, %rax, 8)
+  movabs $syscall_table, %rbx
+  call *(%rbx, %rax, 8)
 
   RESTORE_CONTEXT 0
   pop %rsp

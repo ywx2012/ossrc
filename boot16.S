@@ -180,8 +180,10 @@ e820_entry:
 .code64
 .globl gdt
 start64:
-  lgdt gdtr
-  lidt idtr
+  movabs $gdtr, %rax
+  lgdt (%rax)
+  movabs $idtr, %rax
+  lidt (%rax)
 
   // setup seg
   mov $KERNEL_DS, %ax
@@ -192,9 +194,11 @@ start64:
   mov %ax, %ss
 
   // setup stack
-  mov $task0_stack, %rsp
+  movabs $task0_stack, %rax
+  mov %rax, %rsp
 
-  pushq $main
+  movabs $main, %rax
+  pushq %rax
   ret
 
         .globl e820
@@ -222,19 +226,12 @@ idtr:
         .align 0x1000, 0
         .globl pml4
 pml4:
-  .quad PA(pml3i)|3
-  .fill 272, 8, 0
-  .quad PA(pml3i)|3
-  .fill 237, 8, 0
-  .quad PA(pml3k)|3
+  .quad PA(pml3)|3
+  .fill 255, 8, 0
+  .quad PA(pml3)|3
+  .fill 255, 8, 0
 
         .align 0x1000, 0
-pml3k:
-  .fill 510, 8, 0
-  .quad 0x0000000000000083
-  .fill 1, 8, 0
-
-        .align 0x1000, 0
-pml3i:
+pml3:
   .quad 0x0000000000000083
   .fill 511, 8, 0

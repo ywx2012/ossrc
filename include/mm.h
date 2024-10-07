@@ -13,12 +13,12 @@
 #define KERNEL_PAGE_NUM (1024 * 16)
 #define PAGE_SIZE 4096
 
-#define PAGE_OFFSET 0xffff888000000000
+#define PAGE_OFFSET 0xffff800000000000
 #define VA(x) ((void*)((unsigned long)(x) + PAGE_OFFSET))
 #define PA(x) ((unsigned long)(x) - PAGE_OFFSET)
 
 extern char pml4[PAGE_SIZE];
-#define TASK0_PML4 (((unsigned long)pml4)-0xffffffff80000000)
+#define TASK0_PML4 (((unsigned long)pml4)-PAGE_OFFSET)
 
 extern unsigned long mem_size;
 extern char pages[MAX_PAGES];
