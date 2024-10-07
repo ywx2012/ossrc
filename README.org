@@ -218,3 +218,7 @@ xbps-install -S qemu-system-amd64
 *** 直接从16位跳到64位
 
 start64可以挪回原来0x100000的位置。boot32.S就不再需要了。
+
+*** 去掉boot16.bin
+
+可以直接把boot16.o链接到

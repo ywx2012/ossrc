@@ -1,18 +1,13 @@
-kernel.bin: build boot16.bin system.bin app/app1.bin app/app2.bin
+kernel.bin: build system.bin app/app1.bin app/app2.bin
 	./build
-
-# kernel img
-boot16.bin: boot16.o
-	ld -Ttext=0x10000 boot16.o -o boot16.elf
-	objcopy -R .note.* -O binary boot16.elf boot16.bin
 
 CFLAGS = -std=c11 -I. -fno-pic -mcmodel=kernel -fno-stack-protector -fno-builtin
 SRCS = main.c $(wildcard mm/*.c) $(wildcard lib/*.c) $(wildcard kernel/*.c) $(wildcard ipc/*.c) \
 			 $(wildcard drivers/*.c)
-OBJS = $(SRCS:.c=.o)
+OBJS = boot16.o head64.o kernel/handler.o $(SRCS:.c=.o)
 
-system.bin: head64.o kernel/handler.o $(OBJS)
-	ld -Ttext=0xffffffff80100000 head64.o kernel/handler.o $(OBJS) -o system.elf
+system.bin: $(OBJS)
+	ld -Ttext=0xffffffff800f9000 $(OBJS) -o system.elf
 	objcopy -R .note.* -O binary system.elf $@
 
 .depend: $(SRCS)

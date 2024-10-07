@@ -165,7 +165,7 @@ e820_rd_entry:
 
 gdtr:
   .word gdt_end - gdt
-  .long gdt
+  .quad gdt - _start + 0x10200
 
 gdt:
   .quad   0x0000000000000000
