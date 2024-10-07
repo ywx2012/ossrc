@@ -9,12 +9,14 @@
 #include "include/interrupt.h"
 #include "include/syscall.h"
 #include "include/vesa.h"
+#include "include/atkbd.h"
 
 int main() {
   mm_init();
   interrupt_init();
   syscall_init(); 
   vesa_init();
+  atkbd_init();
 
   // __asm__ ("sti");
   sched_init();

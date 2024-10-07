@@ -40,6 +40,8 @@ kvmtool支持一种独特的加载方式，当检测不出文件格式时，会�
 
 注释掉main.c里sti那行，这样至少不会一启动就崩溃了。
 
+增加了atkbd_init，关闭8042的translation，并把Scan Code Set设置为2。不然按键输出是错的。
+
 目前已能支持在Github Actions里运行起来，并通过截图对比。
 
 *** 支持在不同Linux发行版下编译运行

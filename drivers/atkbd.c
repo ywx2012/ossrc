@@ -1,6 +1,7 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
+#include <sys/io.h>
 #include "include/types.h"
 #include "include/print.h"
 
@@ -61,4 +62,34 @@ void process_kb() {
   }
 	
   print(keymap[scancode]);	
+}
+
+#define DATA_REG 0x60
+#define CMD_REG 0x64
+
+#define ENABLE_PORT1 0xAE
+#define DISABLE_PORT1 0xAD
+#define DISABLE_PORT2 0xA7
+#define READ_BYTE 0x20
+#define WRITE_BYTE 0x60
+#define TRANSLATION_FLAG 0x40
+
+#define SET_SCANCODESET 0xF0
+
+void atkbd_init() {
+  outb(DISABLE_PORT1, CMD_REG);
+  outb(DISABLE_PORT2, CMD_REG);
+
+  while(inb(CMD_REG) & 0x1)
+    inb(DATA_REG);
+
+  outb(READ_BYTE+0, CMD_REG);
+  unsigned char c = inb(DATA_REG);
+  outb(WRITE_BYTE+0, CMD_REG);
+  outb(c^(c&TRANSLATION_FLAG),  DATA_REG);
+
+  outb(SET_SCANCODESET, DATA_REG);
+  outb(0x02, DATA_REG);
+
+  outb(ENABLE_PORT1, CMD_REG);
 }
