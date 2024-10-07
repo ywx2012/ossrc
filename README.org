@@ -250,3 +250,7 @@ C头文件里有定义，完全没必要自己写
 *** 去掉app/libc/type.h
 
 完全没必要自己定义一遍
+
+*** 去掉app/libc/print.h
+
+和include/print.h重复了
