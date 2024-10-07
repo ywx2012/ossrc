@@ -16,7 +16,9 @@ Tags下面放的是完全没有任何改动的纯净版原始源码。
 
 ~main~ 分支如无必要，不对原始代码进行任何改动。
 
-** 改动
+~mob~ 分支有大量可能和作者写作意图冲突的改动，请勿参考。
+
+** ~main~ 改动
 
 *** 支持Linux/x86 Boot Protocol
 
@@ -256,3 +258,5 @@ xbps-install -S SDL-devel
 #+BEGIN_SRC sh :tangle tmp/qemu/void
 xbps-install -S qemu-system-amd64
 #+END_SRC
+
+** ~mob~ 改动
