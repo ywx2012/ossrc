@@ -27,3 +27,15 @@ kvmtool支持一种独特的加载方式，当检测不出文件格式时，会�
 因为pml2内容会由前面的代码填充，故一开始全填零即可。原始代码在这里填了第一项。
 
 因为vesa_mode_info固定在0x4000，且有256个字节了，因此setup_sects为0x20，(0x4200-0x200)/512。
+
+### 支持QEMU
+
+参考[INT 15H, E820H](https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/15_System_Address_Map_Interfaces/int-15h-e820h---query-system-address-map.html)，查询系统地址区间时需要设置EDX为0x0534D4150。原始代码漏了这行，倒也不影响在kvmtool上运行。
+
+因为QEMU不支持VESA，参考[VBE Display API](http://cvs.savannah.nongnu.org/viewvc/*checkout*/vgabios/vgabios/vbe_display_api.txt?revision=1.14)，改成[QEMU Standard VGA](https://www.qemu.org/docs/master/specs/standard-vga.html)获取framebuffer地址。并强制设置成640x480x32。
+
+因为QEMU默认内存大小为128M，而原始代码app1和app2物理地址起始位置分别为0xc800000和0xd000000。分别改成0x1000000和0x2000000。
+
+注释掉main.c里sti那行，这样至少不会一启动就崩溃了。
+
+目前已能支持在Github Actions里运行起来，并通过截图对比。

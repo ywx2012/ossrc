@@ -16,7 +16,7 @@ int main() {
   syscall_init(); 
   vesa_init();
 
-  __asm__ ("sti"); 
+  // __asm__ ("sti");
   sched_init();
   tss_init();
 

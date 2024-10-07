@@ -77,8 +77,8 @@ static void make_idle_task() {
 }
 
 void sched_init() {
-  make_task(1, 0x100000, 0xc800000);
-  make_task(2, 0x100000, 0xd000000);  
+  make_task(1, 0x100000, 0x1000000);
+  make_task(2, 0x100000, 0x2000000);
   make_idle_task();
 
   current = task_head; 

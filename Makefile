@@ -11,7 +11,7 @@ boot32.bin: boot32.o
 	objcopy -O binary boot32.elf boot32.bin
 
 CFLAGS = -std=c11 -I. -fno-pic -mcmodel=kernel -fno-stack-protector -fcf-protection=none \
-				 -nostdinc -fno-builtin
+				 -fno-builtin
 SRCS = main.c $(wildcard mm/*.c) $(wildcard lib/*.c) $(wildcard kernel/*.c) $(wildcard ipc/*.c) \
 			 $(wildcard drivers/*.c)
 OBJS = $(SRCS:.c=.o)

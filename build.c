@@ -52,7 +52,7 @@ int main() {
   close(fd);
 
   // app1
-  lseek(fd_kernel, 0xc800000 - BASE, SEEK_SET);
+  lseek(fd_kernel, 0x1000000 - BASE, SEEK_SET);
   fd = open("app/app1.bin", O_RDONLY);
   while (1) {
     c = read(fd, buf, 512);
@@ -65,7 +65,7 @@ int main() {
   close(fd);
 
   // app2
-  lseek(fd_kernel, 0xd000000 - BASE, SEEK_SET);
+  lseek(fd_kernel, 0x2000000 - BASE, SEEK_SET);
   fd = open("app/app2.bin", O_RDONLY);
   while (1) {
     c = read(fd, buf, 512);
