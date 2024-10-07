@@ -13,7 +13,7 @@
         // https://www.kernel.org/doc/html/latest/arch/x86/boot.html
         .fill 0x1F1, 1, 0
         // setup_sects:
-        .byte   0x20
+        .byte   0x37
         // root_flags
         .word   0
         // syssize
@@ -133,9 +133,33 @@ e820_rd_entry:
 
   lgdt (gdtr-_start+0x200)
 
-  mov %cr0, %eax
-  or $0x1, %eax
-  mov %eax, %cr0
+  xorl %eax, %eax
+  # Enable PAE
+  btsl $5, %eax
+  # Enable PSE
+  btsl $4, %eax
+  movl %eax, %cr4
+
+  # Setup cr3
+  movl  $0x14000, %eax
+  movl  %eax, %cr3
+
+  # Setup EFER
+  movl  $0xc0000080, %ecx
+  rdmsr
+  # Enable Long Mode
+  btsl  $8, %eax
+  # Enable syscall/sysret
+  btsl  $0, %eax
+  wrmsr
+
+  # Activate long mode
+  xorl %eax, %eax
+  # Enable paging
+  btsl $31, %eax
+  # Enable protected mode
+  btsl $0, %eax
+  movl %eax, %cr0
 
   ljmpl $0x8, $0x100000
 
@@ -144,9 +168,9 @@ gdtr:
   .long gdt
 
 gdt:
-  .quad 0x0000000000000000
-  .quad 0x00c09a00000007ff
-  .quad 0x00c09200000007ff
+  .quad   0x0000000000000000
+  .quad   0x00a09a0000000000
+  .quad   0x00c0920000000000
 gdt_end:
 
 # e820map
@@ -156,5 +180,23 @@ e820_nr_entry:
 e820_entry:
   .fill 512, 1, 0
 
-  .align 512, 0
-  .org 0x4200
+.org 0x4000
+pml4:
+  .quad 0x0000000000016003
+  .fill 272, 8, 0
+  .quad 0x0000000000016003
+  .fill 237, 8, 0
+  .quad 0x0000000000015003
+
+.org 0x5000
+pml3:
+  .fill 510, 8, 0
+  .quad 0x0000000000000083
+  .fill 1, 8, 0
+
+# id map
+.org 0x6000
+  .quad 0x0000000000000083
+  .fill 511, 8, 0
+
+  .org 0x7000
