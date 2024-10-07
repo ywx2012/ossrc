@@ -10,7 +10,7 @@
 #define VBE_INDEX_BPP 0x3
 #define VBE_INDEX_ENABLE 0x4
 
-void bochs_init(struct vesa_mode_info *mode_info) {
+void bochs_init(struct mode_info *mode_info) {
   outw(VBE_INDEX_ID, VBE_INDEX_PORT);
   if (inw(VBE_DATA_PORT) < 0xb0c0)
     return;

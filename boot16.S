@@ -117,11 +117,6 @@ e820_rd_entry:
   cmp $0, %ebx
   jne e820_rd_entry
 
-  # get display mode info
-  mov $vesa_mode_info, %di
-  mov $0x4f01, %ax
-  int $0x10
-
   # Init 8259A
   # ICW1
   mov $0x13, %al
@@ -160,11 +155,6 @@ e820_nr_entry:
   .long 0
 e820_entry:
   .fill 512, 1, 0
-
-# vesa mode info
-.org 0x4000
-vesa_mode_info:
-  .fill 256, 1, 0
 
   .align 512, 0
   .org 0x4200

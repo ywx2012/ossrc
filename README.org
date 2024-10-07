@@ -206,3 +206,7 @@ xbps-install -S qemu-system-amd64
 *** 改用大页
 
 映射从0开始的1G。虽然原始代码最多可支持4G内存。因为QEMU默认只开128M内存，完全不用担心。
+
+*** 去掉VESA
+
+反正QEMU不支持VESA，留着也没用
