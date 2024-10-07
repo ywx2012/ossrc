@@ -3,7 +3,7 @@ kernel.bin: build boot16.bin boot32.bin system.bin app/app1.bin app/app2.bin
 
 # kernel img
 boot16.bin: boot16.o
-	ld -Ttext=0x0 boot16.o -o boot16.elf
+	ld -Ttext=0x10000 boot16.o -o boot16.elf
 	objcopy -R .note.* -O binary boot16.elf boot16.bin
 
 boot32.bin: boot32.o

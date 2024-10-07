@@ -104,7 +104,7 @@ start:
 
   # read e820
   mov $0x0534D4150, %edx
-  mov $e820_entry, %di
+  mov $(e820_entry-_start+0x200), %di
   xor %ebx, %ebx
 e820_rd_entry:
   mov $0xe820, %eax
@@ -112,7 +112,7 @@ e820_rd_entry:
   int $0x15
 
   add $20, %di
-  incb e820_nr_entry
+  incb (e820_nr_entry-_start+0x200)
 
   cmp $0, %ebx
   jne e820_rd_entry
@@ -131,7 +131,7 @@ e820_rd_entry:
   mov $(IO_PIC+1), %dx
   out %al, %dx
 
-  lgdt gdtr
+  lgdt (gdtr-_start+0x200)
 
   mov %cr0, %eax
   or $0x1, %eax
@@ -141,7 +141,7 @@ e820_rd_entry:
 
 gdtr:
   .word gdt_end - gdt
-  .word gdt, 1
+  .long gdt
 
 gdt:
   .quad 0x0000000000000000

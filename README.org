@@ -210,3 +210,7 @@ xbps-install -S qemu-system-amd64
 *** 去掉VESA
 
 反正QEMU不支持VESA，留着也没用
+
+*** boot16链接时起始地址应设为实际物理地址
+
+~.word gdt, 1~ 那行很费解
