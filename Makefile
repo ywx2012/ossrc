@@ -63,7 +63,7 @@ build: build.c
 .PHONY: clean run
 
 run: kernel.bin
-	~/kvmtool/lkvm run --sdl -c 1 -k ./kernel.bin
+	qemu-system-x86_64 -kernel ./kernel.bin
 
 clean:
 	find -name "*.o" -o -name "*.elf" -o -name "*.bin" | xargs rm -f

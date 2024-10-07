@@ -50,19 +50,6 @@ jobs:
           "void": "xbps-install -S libstdc++ libmount ImageMagick bash",
         }.items())
 
-        d["git"] = ' '.join(f"{k}_git='{v}'" for k, v in {
-          "alpine": "apk add git xvfb",
-          "alt": "apt-get install git xorg-xvfb",
-          "archlinux": "pacman -S git xorg-server-xvfb",
-          "centos": "dnf install --setopt=install_weak_deps=False git xorg-x11-server-Xvfb",
-          "debian": "apt-get install git && apt-get install --no-install-recommends xvfb",
-          "fedora": "dnf install --setopt=install_weak_deps=False git xwayland-run",
-          "mageia": "dnf install --setopt=install_weak_deps=False git x11-server-xvfb",
-          "opensuse": "zypper install --no-recommends git xorg-x11-server-Xvfb",
-          "ubuntu": "apt-get install git && apt-get install --no-install-recommends xvfb",
-          "void": "xbps-install -S git xorg-server-xvfb",
-        }.items())
-
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
             for name, value in d.items():
                 f.write(f"{name}={json.dumps(value)}\n")
@@ -80,11 +67,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner:
-        - kvmtool
-        - qemu
         distro:
         - {}
+        - name: alpine
         - name: alt
           container: alt:sisyphus
         - name: archlinux
@@ -100,18 +85,6 @@ jobs:
         - name: ubuntu
         - name: void
           container: ghcr.io/void-linux/void-glibc-full
-        experimental:
-        - false
-        include:
-        - runner: kvmtool
-          distro:
-            name: alpine
-          experimental: true
-        - runner: qemu
-          distro:
-            name: alpine
-          experimental: false
-    continue-on-error: ${{ matrix.experimental }}
 
     runs-on: 'ubuntu-latest'
     container:
@@ -147,27 +120,11 @@ jobs:
 
         alias ${{ fromJSON(needs.gen-scripts.outputs.prelude) }}
         alias ${{ fromJSON(needs.gen-scripts.outputs.compile) }}
-        alias ${{ fromJSON(needs.gen-scripts.outputs.kvmtool) }}
-        alias ${{ fromJSON(needs.gen-scripts.outputs.git) }}
         alias ${{ fromJSON(needs.gen-scripts.outputs.qemu) }}
 
         ${{ matrix.distro.name || 'ubuntu' }}_prelude
         ${{ matrix.distro.name || 'ubuntu' }}_compile
-
-        case "${{ matrix.runner }}" in
-        "kvmtool")
-          ${{ matrix.distro.name || 'ubuntu' }}_git
-          ${{ matrix.distro.name || 'ubuntu' }}_kvmtool
-
-          git clone git://git.kernel.org/pub/scm/linux/kernel/git/will/kvmtool.git ~/kvmtool
-          cd ~/kvmtool
-          sed -i '1i #include <libgen.h>' vfio/core.c
-          make
-        ;;
-        "qemu")
-          ${{ matrix.distro.name || 'ubuntu' }}_qemu
-        ;;
-        esac
+        ${{ matrix.distro.name || 'ubuntu' }}_qemu
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -175,19 +132,7 @@ jobs:
     - name: Build
       run: make
 
-    - name: Run and take screenshot (kvmtool)
-      if: ${{ matrix.runner == 'kvmtool' }}
-      run: |
-        ${{ matrix.distro.xvfb || 'Xvfb :0 -screen 0 640x480x24' }} &
-        export DISPLAY=:0
-        sleep 5
-        make run &
-        sleep 10
-        import -window root png:- | convert - -fill white +opaque black /tmp/screenshot.png
-        base64 /tmp/screenshot.png
-
-    - name: Run and take screenshot (qemu)
-      if: ${{ matrix.runner == 'qemu' }}
+    - name: Run and take screenshot
       shell: bash
       run: |
         exec 3<> <(cat)

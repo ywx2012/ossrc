@@ -65,14 +65,6 @@ objcopy跳过.note.开头的section。有些发行版默认打开，会导致sys
 apk add make gcc musl-dev linux-headers
 #+END_SRC
 
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/alpine
-apk add sdl12-compat-dev
-#+END_SRC
-
-运行会Segmentation fault，原因不明。
-
 ***** 安装QEMU
 
 #+BEGIN_SRC sh :tangle tmp/qemu/alpine
@@ -85,12 +77,6 @@ apk add qemu-system-x86_64
 
 #+BEGIN_SRC sh :tangle tmp/compile/alt
 apt-get install make gcc
-#+END_SRC
-
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/alt
-apt-get install libSDL-devel glibc-devel-static
 #+END_SRC
 
 ***** 安装QEMU
@@ -107,12 +93,6 @@ apt-get install qemu-system-x86-core
 pacman -S make gcc
 #+END_SRC
 
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/archlinux
-pacman -S sdl12-compat
-#+END_SRC
-
 ***** 安装QEMU
 
 #+BEGIN_SRC sh :tangle tmp/qemu/archlinux
@@ -125,12 +105,6 @@ pacman -S qemu-system-x86
 
 #+BEGIN_SRC sh :tangle tmp/compile/centos
 dnf install --setopt=install_weak_deps=False make gcc
-#+END_SRC
-
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/centos
-dnf install --setopt=install_weak_deps=False glibc-static sdl12-compat-devel
 #+END_SRC
 
 ***** 安装QEMU
@@ -147,12 +121,6 @@ dnf install --setopt=install_weak_deps=False qemu-kvm
 apt-get --no-install-recommends install make gcc libc6-dev
 #+END_SRC
 
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/debian
-apt-get --no-install-recommends install libsdl1.2-compat-dev
-#+END_SRC
-
 ***** 安装QEMU
 
 #+BEGIN_SRC sh :tangle tmp/qemu/debian
@@ -165,12 +133,6 @@ apt-get --no-install-recommends install qemu-system-x86
 
 #+BEGIN_SRC sh :tangle tmp/compile/fedora
 dnf install --setopt=install_weak_deps=False make gcc
-#+END_SRC
-
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/fedora
-dnf install --setopt=install_weak_deps=False glibc-static sdl12-compat-devel
 #+END_SRC
 
 ***** 安装QEMU
@@ -187,12 +149,6 @@ dnf install --setopt=install_weak_deps=False qemu-system-x86-core
 dnf install --setopt=install_weak_deps=False make gcc
 #+END_SRC
 
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/mageia
-dnf install --setopt=install_weak_deps=False glibc-static-devel lib64SDL-devel
-#+END_SRC
-
 ***** 安装QEMU
 
 #+BEGIN_SRC sh :tangle tmp/qemu/mageia
@@ -205,12 +161,6 @@ dnf install --setopt=install_weak_deps=False qemu-system-x86-core
 
 #+BEGIN_SRC sh :tangle tmp/compile/opensuse
 zypper install --no-recommends make gcc
-#+END_SRC
-
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/opensuse
-zypper install --no-recommends libSDL-devel glibc-devel-static
 #+END_SRC
 
 ***** 安装QEMU
@@ -227,12 +177,6 @@ zypper install --no-recommends qemu-x86
 apt-get --no-install-recommends install make gcc libc6-dev
 #+END_SRC
 
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/ubuntu
-apt-get --no-install-recommends install libsdl1.2-compat-dev
-#+END_SRC
-
 ***** 安装QEMU
 
 #+BEGIN_SRC sh :tangle tmp/qemu/ubuntu
@@ -247,12 +191,6 @@ apt-get --no-install-recommends install qemu-system-x86
 xbps-install -S make gcc
 #+END_SRC
 
-***** 安装编译kvmtool所需依赖
-
-#+BEGIN_SRC sh :tangle tmp/kvmtool/void
-xbps-install -S SDL-devel
-#+END_SRC
-
 ***** 安装QEMU
 
 #+BEGIN_SRC sh :tangle tmp/qemu/void
@@ -260,3 +198,7 @@ xbps-install -S qemu-system-amd64
 #+END_SRC
 
 ** ~mob~ 改动
+
+*** 去掉kvmtool
+
+改动Makefile。make run改用QEMU启动。
