@@ -35,3 +35,5 @@ kvmtool支持一种独特的加载方式，当检测不出文件格式时，会�
 因为QEMU不支持VESA，参考[VBE Display API](http://cvs.savannah.nongnu.org/viewvc/*checkout*/vgabios/vgabios/vbe_display_api.txt?revision=1.14)，改成[QEMU Standard VGA](https://www.qemu.org/docs/master/specs/standard-vga.html)获取framebuffer地址。并强制设置成640x480x32。
 
 因为QEMU默认内存大小为128M，而原始代码app1和app2物理地址起始位置分别为0xc800000和0xd000000。分别改成0x1000000和0x2000000。
+
+注释掉main.c里sti那行，这样至少不会一启动就崩溃了。
