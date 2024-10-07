@@ -10,12 +10,119 @@ on:
     - edited
 
 jobs:
-  kvmtool:
+  gen-scripts:
     runs-on: 'ubuntu-latest'
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Generate Files
+      run: |
+        sudo apt-get install emacs
+        emacs --batch --eval "(progn (find-file \"README.org\") (let (org-confirm-babel-evaluate) (org-babel-tangle)))"
+
+    - name: Generate Scripts
+      id: gen
+      shell: python
+      run: |
+        import os
+        import json
+
+        def read_script(name,distro):
+           with open(f"tmp/{name}/{distro}") as f:
+             return f.read().strip()
+
+        d={}
+        for name in os.listdir("tmp"):
+            d[name] = ' '.join(f"{distro}_{name}='{read_script(name,distro)}'" for distro in os.listdir(f"tmp/{name}"))
+
+        d["prelude"] = ' '.join(f"{k}_prelude='{v}'" for k, v in {
+          "alpine": "apk add imagemagick bash",
+          "alt": "apt-get update && apt-get install ImageMagick",
+          "archlinux": "pacman -Sy imagemagick diffutils",
+          "centos": "dnf config-manager --enable crb && dnf install epel-release && dnf install --setopt=install_weak_deps=False ImageMagick diffutils",
+          "debian": "apt-get update && apt-get install --no-install-recommends imagemagick",
+          "fedora": "dnf install --setopt=install_weak_deps=False ImageMagick diffutils",
+          "mageia": "dnf install --setopt=install_weak_deps=False imagemagick diffutils",
+          "opensuse": "zypper install --no-recommends tar gzip which ImageMagick",
+          "ubuntu": "apt-get update && apt-get install --no-install-recommends imagemagick",
+          "void": "xbps-install -S libstdc++ libmount ImageMagick bash",
+        }.items())
+
+        d["git"] = ' '.join(f"{k}_git='{v}'" for k, v in {
+          "alpine": "apk add git xvfb",
+          "alt": "apt-get install git xorg-xvfb",
+          "archlinux": "pacman -S git xorg-server-xvfb",
+          "centos": "dnf install --setopt=install_weak_deps=False git xorg-x11-server-Xvfb",
+          "debian": "apt-get install git && apt-get install --no-install-recommends xvfb",
+          "fedora": "dnf install --setopt=install_weak_deps=False git xwayland-run",
+          "mageia": "dnf install --setopt=install_weak_deps=False git x11-server-xvfb",
+          "opensuse": "zypper install --no-recommends git xorg-x11-server-Xvfb",
+          "ubuntu": "apt-get install git && apt-get install --no-install-recommends xvfb",
+          "void": "xbps-install -S git xorg-server-xvfb",
+        }.items())
+
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            for name, value in d.items():
+                f.write(f"{name}={json.dumps(value)}\n")
+
+    outputs:
+      prelude: ${{ steps.gen.outputs.prelude }}
+      compile: ${{ steps.gen.outputs.compile }}
+      kvmtool: ${{ steps.gen.outputs.kvmtool }}
+      qemu: ${{ steps.gen.outputs.qemu }}
+      git: ${{ steps.gen.outputs.git }}
+
+  run:
+    needs:
+    - gen-scripts
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+        - kvmtool
+        - qemu
+        distro:
+        - {}
+        - name: alt
+          container: alt:sisyphus
+        - name: archlinux
+        - name: centos
+          container: quay.io/centos/centos:stream9
+          qemu: /usr/libexec/qemu-kvm
+        - name: debian
+        - name: fedora
+          xvfb: wlheadless-run -- Xwayland :0 -fullscreen -geometry 640x480
+        - name: mageia
+        - name: opensuse
+          container: registry.opensuse.org/opensuse/leap
+        - name: ubuntu
+        - name: void
+          container: ghcr.io/void-linux/void-glibc-full
+        experimental:
+        - false
+        include:
+        - runner: kvmtool
+          distro:
+            name: alpine
+          experimental: true
+        - runner: qemu
+          distro:
+            name: alpine
+          experimental: false
+    continue-on-error: ${{ matrix.experimental }}
+
+    runs-on: 'ubuntu-latest'
+    container:
+      image: ${{ matrix.distro.container || matrix.distro.name }}
+      options: --device=/dev/kvm
+
     steps:
 
     # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
     - name: Enable KVM group perms
+      if: ${{ !(matrix.distro.name) }}
       run: |
         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
         sudo udevadm control --reload-rules
@@ -23,16 +130,44 @@ jobs:
 
     - name: Install packages
       run: |
-        sudo apt-get update
-        sudo apt-get --no-install-recommends install libsdl1.2-compat-dev xvfb
+        case "${{ matrix.distro.name }}" in
+        "")
+          shopt -s expand_aliases
+          alias apt-get="sudo apt-get -y"
+          ;;
+         *)
+          export DEBIAN_FRONTEND=noninteractive
+          alias apt-get="apt-get -y"
+          alias dnf="dnf -y"
+          alias pacman="pacman --noconfirm"
+          alias xbps-install="xbps-install -y"
+          alias zypper="zypper --non-interactive"
+          ;;
+        esac
 
-    - name: Build kvmtool
-      run: |
-        git clone git://git.kernel.org/pub/scm/linux/kernel/git/will/kvmtool.git ~/kvmtool
-        pushd .
-        cd ~/kvmtool
-        make
-        popd
+        alias ${{ fromJSON(needs.gen-scripts.outputs.prelude) }}
+        alias ${{ fromJSON(needs.gen-scripts.outputs.compile) }}
+        alias ${{ fromJSON(needs.gen-scripts.outputs.kvmtool) }}
+        alias ${{ fromJSON(needs.gen-scripts.outputs.git) }}
+        alias ${{ fromJSON(needs.gen-scripts.outputs.qemu) }}
+
+        ${{ matrix.distro.name || 'ubuntu' }}_prelude
+        ${{ matrix.distro.name || 'ubuntu' }}_compile
+
+        case "${{ matrix.runner }}" in
+        "kvmtool")
+          ${{ matrix.distro.name || 'ubuntu' }}_git
+          ${{ matrix.distro.name || 'ubuntu' }}_kvmtool
+
+          git clone git://git.kernel.org/pub/scm/linux/kernel/git/will/kvmtool.git ~/kvmtool
+          cd ~/kvmtool
+          sed -i '1i #include <libgen.h>' vfio/core.c
+          make
+        ;;
+        "qemu")
+          ${{ matrix.distro.name || 'ubuntu' }}_qemu
+        ;;
+        esac
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -40,9 +175,10 @@ jobs:
     - name: Build
       run: make
 
-    - name: Run and take screenshot
+    - name: Run and take screenshot (kvmtool)
+      if: ${{ matrix.runner == 'kvmtool' }}
       run: |
-        Xvfb :0 -screen 0 640x480x24 &
+        ${{ matrix.distro.xvfb || 'Xvfb :0 -screen 0 640x480x24' }} &
         export DISPLAY=:0
         sleep 5
         make run &
@@ -50,49 +186,17 @@ jobs:
         import -window root png:- | convert - -fill white +opaque black /tmp/screenshot.png
         base64 /tmp/screenshot.png
 
-    - name: Make binary reference image
+    - name: Run and take screenshot (qemu)
+      if: ${{ matrix.runner == 'qemu' }}
+      shell: bash
       run: |
-        convert screenshot.png -fill white +opaque black /tmp/binary.png
-        base64 /tmp/binary.png
-
-    - name: Compare screenshot
-      run: diff <(convert /tmp/binary.png mono:-) <(convert /tmp/screenshot.png mono:-)
-
-  qemu:
-    runs-on: 'ubuntu-latest'
-    steps:
-
-    # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
-    - name: Enable KVM group perms
-      run: |
-        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-        sudo udevadm control --reload-rules
-        sudo udevadm trigger --name-match=kvm
-
-    - name: Install packages
-      run: |
-        sudo apt-get update
-        sudo apt-get --no-install-recommends install xvfb qemu-system-x86
-
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Build
-      run: make
-
-    - name: Run and take screenshot
-      run: |
-        Xvfb :0 -screen 0 640x480x24 &
-        export DISPLAY=:0
-        sleep 5
-        qemu-system-x86_64 -net none -boot reboot-timeout=0 -action reboot=shutdown -qmp tcp:127.0.0.1:4444,server=on,wait=off -kernel kernel.bin &
+        exec 3<> <(cat)
+        ${{ matrix.distro.qemu || 'qemu-system-x86_64' }} -net none -boot reboot-timeout=0 -action reboot=shutdown -chardev stdio,id=mon1 -mon chardev=mon1,mode=control -display vnc=:0 -kernel kernel.bin <&3 &
         sleep 30
-        exec 3<>/dev/tcp/127.0.0.1/4444
         echo '{ "execute": "qmp_capabilities", "arguments": { } }' >&3
         echo '{ "execute": "screendump", "arguments": { "filename": "/tmp/screenshot.ppm" } }' >&3
         sleep 2
         echo '{ "execute": "quit" }' >&3
-        cat <&3
         convert /tmp/screenshot.ppm -fill white +opaque black /tmp/screenshot.png
         base64 /tmp/screenshot.png
 
@@ -102,4 +206,5 @@ jobs:
         base64 /tmp/binary.png
 
     - name: Compare screenshot
+      shell: bash
       run: diff <(convert /tmp/binary.png mono:-) <(convert /tmp/screenshot.png mono:-)

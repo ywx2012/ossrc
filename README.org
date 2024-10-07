@@ -1,0 +1,256 @@
+* 《穿越操作系统迷雾》源码
+
+经作者同意，上传到GitHub。仅供学习交流使用，分享转载请保留作者版权声明。
+
+可以前往[[https://book.douban.com/subject/36560814/][豆瓣]]和作者讨论交流。
+
+** 截图
+
+#+CAPTION: Screenshot
+#+NAME: fig:screenshot
+[[./screenshot.png]]
+
+** 仓库说明
+
+Tags下面放的是完全没有任何改动的纯净版原始源码。
+
+~main~ 分支如无必要，不对原始代码进行任何改动。
+
+** 改动
+
+*** 支持Linux/x86 Boot Protocol
+
+kvmtool支持一种独特的加载方式，当检测不出文件格式时，会把内核文件内容直接加载到0x10000处。原始代码只支持这一种加载方式，离开了kvmtool就无法运行。这里对原始代码进行了一些的改动，以便支持Linux/x86 Boot Protocol。这样就不会报Warning: Kernel image is not a bzImage了，也方便后续支持在QEMU下运行。
+
+因为Linux/x86 Boot Protocol会把保护模式代码加载到0x100000。因此需要把start32改到这个位置，同时因为在原始代码中这是start64所在位置，先把start64挪到0x200000。
+
+原始代码中，跳往start64时，并没有跳到0xffffffff80100000这个地址，而是跳到了0x100000。因此，在0x0和0xffffffff80000000开始的地址空间内都映射了内核。不知道出于什么原因，0x0处仅映射了2MB，而0xffffffff80000000处映射了KERNEL_PAGE_NUM页。为方便起见，这里就把原始代码 .org 0x33000 处第一项直接指向 pml2 。
+
+因为pml2内容会由前面的代码填充，故一开始全填零即可。原始代码在这里填了第一项。
+
+因为vesa_mode_info固定在0x4000，且有256个字节了，因此setup_sects为0x20，(0x4200-0x200)/512。
+
+*** 支持QEMU
+
+参考[[https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/15_System_Address_Map_Interfaces/int-15h-e820h---query-system-address-map.html][INT 15H, E820H]]，查询系统地址区间时需要设置EDX为0x0534D4150。原始代码漏了这行，倒也不影响在kvmtool上运行。
+
+因为QEMU不支持VESA，参考[[http://cvs.savannah.nongnu.org/viewvc/*checkout*/vgabios/vgabios/vbe_display_api.txt?revision=1.14][VBE Display API]]，改成[[https://www.qemu.org/docs/master/specs/standard-vga.html][QEMU Standard VGA]]获取framebuffer地址。并强制设置成640x480x32。
+
+因为QEMU默认内存大小为128M，而原始代码app1和app2物理地址起始位置分别为0xc800000和0xd000000。分别改成0x1000000和0x2000000。
+
+注释掉main.c里sti那行，这样至少不会一启动就崩溃了。
+
+目前已能支持在Github Actions里运行起来，并通过截图对比。
+
+*** 支持在不同Linux发行版下编译运行
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+
+objcopy跳过.note.开头的section。有些发行版默认打开，会导致system.bin无法生成。
+
+删除 ~-fcf-protection=none~ ，因为有些发行版编译器不支持。
+
+有的发行版无法编译 ~push $main~ 这行，改为 ~pushq $main~
+
+**** Alpine
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/alpine
+apk add make gcc musl-dev linux-headers
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/alpine
+apk add sdl12-compat-dev
+#+END_SRC
+
+运行会Segmentation fault，原因不明。
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/alpine
+apk add qemu-system-x86_64
+#+END_SRC
+
+**** ALT
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/alt
+apt-get install make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/alt
+apt-get install libSDL-devel glibc-devel-static
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/alt
+apt-get install qemu-system-x86-core
+#+END_SRC
+
+**** ArchLinux
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/archlinux
+pacman -S make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/archlinux
+pacman -S sdl12-compat
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/archlinux
+pacman -S qemu-system-x86
+#+END_SRC
+
+**** CentOS
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/centos
+dnf install --setopt=install_weak_deps=False make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/centos
+dnf install --setopt=install_weak_deps=False glibc-static sdl12-compat-devel
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/centos
+dnf install --setopt=install_weak_deps=False qemu-kvm
+#+END_SRC
+
+**** Debian
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/debian
+apt-get --no-install-recommends install make gcc libc6-dev
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/debian
+apt-get --no-install-recommends install libsdl1.2-compat-dev
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/debian
+apt-get --no-install-recommends install qemu-system-x86
+#+END_SRC
+
+**** Fedora
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/fedora
+dnf install --setopt=install_weak_deps=False make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/fedora
+dnf install --setopt=install_weak_deps=False glibc-static sdl12-compat-devel
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/fedora
+dnf install --setopt=install_weak_deps=False qemu-system-x86-core
+#+END_SRC
+
+**** Mageia
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/mageia
+dnf install --setopt=install_weak_deps=False make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/mageia
+dnf install --setopt=install_weak_deps=False glibc-static-devel lib64SDL-devel
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/mageia
+dnf install --setopt=install_weak_deps=False qemu-system-x86-core
+#+END_SRC
+
+**** openSUSE
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/opensuse
+zypper install --no-recommends make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/opensuse
+zypper install --no-recommends libSDL-devel glibc-devel-static
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/opensuse
+zypper install --no-recommends qemu-x86
+#+END_SRC
+
+**** Ubuntu
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/ubuntu
+apt-get --no-install-recommends install make gcc libc6-dev
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/ubuntu
+apt-get --no-install-recommends install libsdl1.2-compat-dev
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/ubuntu
+apt-get --no-install-recommends install qemu-system-x86
+#+END_SRC
+
+**** Void
+
+***** 安装编译工具
+
+#+BEGIN_SRC sh :tangle tmp/compile/void
+xbps-install -S make gcc
+#+END_SRC
+
+***** 安装编译kvmtool所需依赖
+
+#+BEGIN_SRC sh :tangle tmp/kvmtool/void
+xbps-install -S SDL-devel
+#+END_SRC
+
+***** 安装QEMU
+
+#+BEGIN_SRC sh :tangle tmp/qemu/void
+xbps-install -S qemu-system-amd64
+#+END_SRC
