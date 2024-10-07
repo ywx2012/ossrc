@@ -5,6 +5,8 @@
 #include <asm/boot.h>
 #include <asm/bootparam.h>
 
+#include "include/segment.h"
+
 #define IO_PIC     0x20
 #define IRQ_OFFSET 32
 
@@ -131,7 +133,7 @@ e820_rd_entry:
   mov $(IO_PIC+1), %dx
   out %al, %dx
 
-  lgdt (gdtr-_start+0x200)
+  lgdt (gdtr16-_start+0x200)
 
   xorl %eax, %eax
   # Enable PAE
@@ -163,15 +165,9 @@ e820_rd_entry:
 
   ljmpl $0x8, $0x100000
 
-gdtr:
+gdtr16:
   .word gdt_end - gdt
-  .quad gdt - _start + 0x10200
-
-gdt:
-  .quad   0x0000000000000000
-  .quad   0x00a09a0000000000
-  .quad   0x00c0920000000000
-gdt_end:
+  .quad gdt
 
 # e820map
 .org 0x3000
@@ -200,3 +196,41 @@ pml3:
   .fill 511, 8, 0
 
   .org 0x7000
+
+.code64
+.globl gdt
+start64:
+  lgdt gdtr
+  lidt idtr
+
+  // setup seg
+  mov $KERNEL_DS, %ax
+  mov %ax, %ds
+  mov %ax, %es
+  mov %ax, %fs
+  mov %ax, %gs
+  mov %ax, %ss
+
+  // setup stack
+  mov $task0_stack, %rsp
+
+  pushq $main
+  ret
+
+gdt:
+  .quad 0x0000000000000000  /* reserved */
+  .quad 0x00209a0000000000  /* kernel cs */
+  .quad 0x0000920000000000  /* kernel ds */
+  .quad 0x0000000000000000  /* user32 cs */
+  .quad 0x0000f20000000000  /* user ds */
+  .quad 0x0020fa0000000000  /* user64 cs */
+  .fill 64 - 6, 8, 0
+gdt_end:
+
+gdtr:
+  .word gdt_end - gdt
+  .quad gdt
+
+idtr:
+  .word 16 * 256
+  .quad idt_table
