@@ -74,6 +74,4 @@ void mm_init() {
   for (int i = 0; i < KERNEL_PAGE_NUM; i++) {
     pages[i] = 1;
   }
-
-  map_range(TASK0_PML4, (unsigned long)VA(0), 0, 0, (mem_size + PAGE_SIZE - 1) / PAGE_SIZE);
 }
