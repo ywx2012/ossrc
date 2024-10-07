@@ -9,13 +9,14 @@
 
 #define IO_PIC     0x20
 #define IRQ_OFFSET 32
+#define PA(x) ((x)-start64+0x100000)
 
 .text
 .code16
         // https://www.kernel.org/doc/html/latest/arch/x86/boot.html
         .fill 0x1F1, 1, 0
         // setup_sects:
-        .byte   0x37
+        .byte   0x7
         // root_flags
         .word   0
         // syssize
@@ -143,7 +144,7 @@ e820_rd_entry:
   movl %eax, %cr4
 
   # Setup cr3
-  movl  $0x14000, %eax
+  movl  $PA(pml4), %eax
   movl  %eax, %cr3
 
   # Setup EFER
@@ -169,33 +170,12 @@ gdtr16:
   .word gdt_end - gdt
   .quad gdt
 
-# e820map
-.org 0x3000
 e820_nr_entry:
   .long 0
 e820_entry:
-  .fill 512, 1, 0
+  .fill 640, 1, 0
 
-.org 0x4000
-pml4:
-  .quad 0x0000000000016003
-  .fill 272, 8, 0
-  .quad 0x0000000000016003
-  .fill 237, 8, 0
-  .quad 0x0000000000015003
-
-.org 0x5000
-pml3:
-  .fill 510, 8, 0
-  .quad 0x0000000000000083
-  .fill 1, 8, 0
-
-# id map
-.org 0x6000
-  .quad 0x0000000000000083
-  .fill 511, 8, 0
-
-  .org 0x7000
+  .org 0x1000
 
 .code64
 .globl gdt
@@ -217,6 +197,10 @@ start64:
   pushq $main
   ret
 
+        .globl e820
+e820:
+        .quad e820_nr_entry - _start + 0x10200
+
 gdt:
   .quad 0x0000000000000000  /* reserved */
   .quad 0x00209a0000000000  /* kernel cs */
@@ -234,3 +218,23 @@ gdtr:
 idtr:
   .word 16 * 256
   .quad idt_table
+
+        .align 0x1000, 0
+        .globl pml4
+pml4:
+  .quad PA(pml3i)|3
+  .fill 272, 8, 0
+  .quad PA(pml3i)|3
+  .fill 237, 8, 0
+  .quad PA(pml3k)|3
+
+        .align 0x1000, 0
+pml3k:
+  .fill 510, 8, 0
+  .quad 0x0000000000000083
+  .fill 1, 8, 0
+
+        .align 0x1000, 0
+pml3i:
+  .quad 0x0000000000000083
+  .fill 511, 8, 0

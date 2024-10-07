@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define BASE (0x100000 - 0x7000)
+#define BASE (0x100000 - 0x1000)
 
 int main() {
   int fd, fd_kernel;

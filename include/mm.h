@@ -17,7 +17,8 @@
 #define VA(x) ((void*)((unsigned long)(x) + PAGE_OFFSET))
 #define PA(x) ((unsigned long)(x) - PAGE_OFFSET)
 
-#define TASK0_PML4 0x14000
+extern char pml4[PAGE_SIZE];
+#define TASK0_PML4 (((unsigned long)pml4)-0xffffffff80000000)
 
 extern unsigned long mem_size;
 extern char pages[MAX_PAGES];
@@ -32,6 +33,8 @@ struct e820map {
   uint32_t nr_entry;
   struct e820entry map[E820MAX];
 };
+
+extern struct e820map *e820;
 
 void mm_init();
 unsigned long alloc_page();
