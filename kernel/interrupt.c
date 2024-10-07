@@ -2,6 +2,7 @@
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
 #include <stdint.h>
+#include <sys/io.h>
 #include "include/interrupt.h"
 #include "include/string.h"
 #include "include/segment.h"
@@ -22,9 +23,9 @@ struct gate_desc {
 struct gate_desc idt_table[256];
 
 void init_8254() {
-  __asm__ ("outb %%al, $0x43"::"a"(0x36));
-  __asm__ ("outb %%al, $0x40"::"a"(COUNTER & 0xff));
-  __asm__ ("outb %%al, $0x40"::"a"(COUNTER >> 8));  
+  outb(0x36, 0x43);
+  outb((COUNTER&0xff), 0x40);
+  outb((COUNTER>>8), 0x40);
 }
 
 static void set_gate(unsigned char index, unsigned long addr, char type) {

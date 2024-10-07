@@ -46,10 +46,8 @@ unsigned char keymap[256] = {
 };
 
 void process_kb() {
-  unsigned char scancode;
   static unsigned char prevcode;
-
-  __asm__ ("inb $0x60, %%al" : "=a"(scancode));
+  unsigned char scancode = inb(0x60);
 	
   if (scancode == 0xe0 || scancode == 0xf0) {
     prevcode = scancode;
