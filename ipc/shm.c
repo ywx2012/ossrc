@@ -46,7 +46,7 @@ int do_shm(char* name) {
     }
   }
 
-  map_range(current->pml4, va, shm->page, 0x4, 1);
+  map_page(current->pml4, va, shm->page, 0x4);
 
   return va;
 }
