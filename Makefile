@@ -4,10 +4,12 @@ SRCS = main.c $(wildcard mm/*.c) $(wildcard lib/*.c) $(wildcard kernel/*.c) $(wi
 OBJS = boot16.o head64.o kernel/handler.o $(SRCS:.c=.o)
 APPS = $(wildcard app/*.c)
 
-kernel.bin: build system.bin $(APPS:%.c=%.bin)
-	./build
+all: kernel.bin initrd.bin
 
-system.bin: $(OBJS)
+initrd.bin: $(APPS:%.c=%.bin)
+	printf '%s\n' ${^:app/%=%} | cpio -D app -ov --format=newc > $@
+
+kernel.bin: $(OBJS)
 	ld -Ttext=0xffff8000000ff000 $(OBJS) -o system.elf
 	objcopy -R .note.* -O binary system.elf $@
 
@@ -38,15 +40,11 @@ app/%.bin: app/libc/start.o app/%.o app/libc/libc.o app/libdraw/libdraw.o
 	ld -Ttext=0x100000 $^ -o $(@:.bin=.elf)
 	objcopy -R .note.* -O binary $(@:.bin=.elf) $@
 
-# build tool
-build: build.c
-	gcc $< -o $@
-
 .PHONY: clean run
 .PRECIOUS: $(APPS:%.c=%.o)
 
-run: kernel.bin
-	qemu-system-x86_64 -kernel ./kernel.bin
+run: kernel.bin initrd.bin
+	qemu-system-x86_64 -kernel ./kernel.bin -initrd ./initrd.bin
 
 clean:
 	find -name "*.o" -o -name "*.elf" -o -name "*.bin" | xargs rm -f

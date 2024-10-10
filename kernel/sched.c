@@ -9,6 +9,26 @@
 #include "include/print.h"
 #include "include/tss.h"
 
+struct cpio_newc_header {
+  char    c_magic[6];
+  char    c_ino[8];
+  char    c_mode[8];
+  char    c_uid[8];
+  char    c_gid[8];
+  char    c_nlink[8];
+  char    c_mtime[8];
+  char    c_filesize[8];
+  char    c_devmajor[8];
+  char    c_devminor[8];
+  char    c_rdevmajor[8];
+  char    c_rdevminor[8];
+  char    c_namesize[8];
+  char    c_check[8];
+};
+
+extern unsigned int *initrd_base;;
+extern unsigned int *initrd_size;
+
 static struct task* task_head;
 static struct task* task_tail;
 struct task* current;
@@ -37,7 +57,38 @@ static void fake_task_stack(unsigned long kstack) {
            : "m"(ss), "m"(rsp), "m"(cs), "m"(rip), "m"(kstack), "m"(rsp_tmp));
 }
 
-static void make_task(unsigned long id, unsigned long entry, unsigned long entry_pa) {
+static unsigned long decode_size(char *size) {
+  unsigned long acc = 0;
+  for (int i=0; i<8; i++) {
+    acc <<= 4;
+    if (size[i] <= '9') {
+      acc |= (size[i] - '0');
+    } else if (size[i] <= 'F') {
+      acc |= (size[i] - 'A') + 10;
+    } else {
+      acc |= (size[i] - 'a') + 10;
+    }
+  }
+  return acc;
+}
+
+static struct cpio_newc_header *lookup_initrd(char *filename) {
+  unsigned long base = *initrd_base;
+  struct cpio_newc_header *cpio = (struct cpio_newc_header *)base;
+
+  while (strcmp((char *)&cpio[1], "TRAILER!!!")) {
+    if (strcmp((char *)&cpio[1], filename) == 0)
+      return cpio;
+
+    unsigned long headersize = (sizeof(struct cpio_newc_header) + decode_size(cpio->c_namesize) + 3) / 4 * 4;
+    unsigned long filesize = (decode_size(cpio->c_filesize) + 3) / 4 * 4;
+    cpio = (struct cpio_newc_header *)(((char *)cpio) + headersize + filesize);
+  }
+
+  return NULL;
+}
+
+static void make_task(unsigned long id, unsigned long entry, char *filename) {
   struct task* task = malloc(sizeof(struct task));
   task->id = id;
   task->state = TASK_RUNNING;
@@ -46,7 +97,20 @@ static void make_task(unsigned long id, unsigned long entry, unsigned long entry
   memset(VA(task->pml4), 0, PAGE_SIZE);
 
   memcpy(VA(task->pml4 + 8 * 256), VA(TASK0_PML4 + 8 * 256), 8 * 256);
-  map_range(task->pml4, entry, entry_pa, 0x4, 1024);
+
+  struct cpio_newc_header *cpio = lookup_initrd(filename);
+  unsigned long headersize = (sizeof(struct cpio_newc_header) + decode_size(cpio->c_namesize) + 3) / 4 * 4;
+  unsigned long filesize = (decode_size(cpio->c_filesize) + 3) / 4 * 4;
+  char *p = ((char *)cpio) + headersize;
+
+  for (unsigned long offset=0; offset<filesize; offset+=PAGE_SIZE) {
+    unsigned long entry_pa = alloc_page();
+    unsigned long size = filesize - offset;
+    if (size > PAGE_SIZE)
+      size = PAGE_SIZE;
+    memcpy((char *)VA(entry_pa), p+offset, size);
+    map_page(task->pml4, entry+offset, entry_pa, 0x4);
+  }
 
   task->kstack = (unsigned long)VA(alloc_page()) + PAGE_SIZE;
   
@@ -78,8 +142,8 @@ static void make_idle_task() {
 }
 
 void sched_init() {
-  make_task(1, 0x100000, 0x1000000);
-  make_task(2, 0x100000, 0x2000000);
+  make_task(1, 0x100000, "app1.bin");
+  make_task(2, 0x100000, "app2.bin");
   make_idle_task();
 
   current = task_head; 

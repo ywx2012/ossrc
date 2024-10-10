@@ -62,7 +62,7 @@ objcopy跳过.note.开头的section。有些发行版默认打开，会导致sys
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/alpine
-apk add make gcc musl-dev linux-headers
+apk add make gcc cpio musl-dev linux-headers
 #+END_SRC
 
 ***** 安装QEMU
@@ -76,7 +76,7 @@ apk add qemu-system-x86_64
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/alt
-apt-get install make gcc
+apt-get install make gcc cpio
 #+END_SRC
 
 ***** 安装QEMU
@@ -90,7 +90,7 @@ apt-get install qemu-system-x86-core
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/archlinux
-pacman -S make gcc
+pacman -S make gcc cpio
 #+END_SRC
 
 ***** 安装QEMU
@@ -104,7 +104,7 @@ pacman -S qemu-system-x86
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/centos
-dnf install --setopt=install_weak_deps=False make gcc
+dnf install --setopt=install_weak_deps=False make gcc cpio
 #+END_SRC
 
 ***** 安装QEMU
@@ -118,7 +118,7 @@ dnf install --setopt=install_weak_deps=False qemu-kvm
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/debian
-apt-get --no-install-recommends install make gcc libc6-dev
+apt-get --no-install-recommends install make gcc cpio libc6-dev
 #+END_SRC
 
 ***** 安装QEMU
@@ -132,7 +132,7 @@ apt-get --no-install-recommends install qemu-system-x86
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/fedora
-dnf install --setopt=install_weak_deps=False make gcc
+dnf install --setopt=install_weak_deps=False make gcc cpio
 #+END_SRC
 
 ***** 安装QEMU
@@ -146,7 +146,7 @@ dnf install --setopt=install_weak_deps=False qemu-system-x86-core
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/mageia
-dnf install --setopt=install_weak_deps=False make gcc
+dnf install --setopt=install_weak_deps=False make gcc cpio
 #+END_SRC
 
 ***** 安装QEMU
@@ -160,7 +160,7 @@ dnf install --setopt=install_weak_deps=False qemu-system-x86-core
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/opensuse
-zypper install --no-recommends make gcc
+zypper install --no-recommends make gcc cpio
 #+END_SRC
 
 ***** 安装QEMU
@@ -174,7 +174,7 @@ zypper install --no-recommends qemu-x86
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/ubuntu
-apt-get --no-install-recommends install make gcc libc6-dev
+apt-get --no-install-recommends install make gcc cpio libc6-dev
 #+END_SRC
 
 ***** 安装QEMU
@@ -188,7 +188,7 @@ apt-get --no-install-recommends install qemu-system-x86
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/void
-xbps-install -S make gcc
+xbps-install -S make gcc cpio
 #+END_SRC
 
 ***** 安装QEMU
@@ -258,3 +258,7 @@ C头文件里有定义，完全没必要自己写
 *** 合并Makefile里app目录下的规则
 
 重复了。顺便删除了没用到的app/app1.S, app/app2.S这两个文件。
+
+*** app从initrd加载
+
+不再需要build.c了

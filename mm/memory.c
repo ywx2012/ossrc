@@ -9,52 +9,27 @@
 char pages[MAX_PAGES];
 unsigned long mem_size = 0;
 
-void map_range(unsigned long pml4_pa, unsigned long from_va, unsigned long to_pa, char us, long npage) {
-  long n = 0;
-    
-  while (n < npage) {
-  	// pml4
-  	unsigned long* page_va = VA(pml4_pa);
-  	short index = (from_va >> 39) & 0x1ff;
-  	unsigned long entry = *(page_va + index);
-  	if (!(entry & 0x1)) {
-      *(page_va + index) = alloc_page() | 0x3 | us;
-      entry = *(page_va + index);
-  	}
+void map_page(unsigned long pml4_pa, unsigned long from_va, unsigned long to_pa, char us) {
+  unsigned long *entry = &pml4_pa;
+  char offsets[3] = {39, 30, 21};
 
-  	// pml3
-  	page_va = VA(entry & 0xffffffffff000);
-  	index = (from_va >> 30) & 0x1ff;
-  	entry = *(page_va + index);
-  	if (!(entry & 0x1)) {
-      *(page_va + index) = alloc_page() | 0x3 | us;
-      entry = *(page_va + index);
-  	}
-
-  	// pml2
-  	page_va = VA(entry & 0xffffffffff000);
-  	index = (from_va >> 21) & 0x1ff;
-  	entry = *(page_va + index);
-  	if (!(entry & 0x1)) {
-      *(page_va + index) = alloc_page() | 0x3 | us;
-      entry = *(page_va + index);
-  	}
-
-  	// pml1
-  	page_va = VA(entry & 0xffffffffff000);
-  	index = (from_va >> 12) & 0x1ff;
-  	if (!((*(page_va + index)) & 0x1)) {
-      *(page_va + index) = (to_pa + PAGE_SIZE * n) | 0x3 | us;
-  	}
-		
-    n++;
-    from_va += PAGE_SIZE;
+  for (int i=0; i<3; ++i) {
+    short index = (from_va >> offsets[i]) & 0x1ff;
+    entry = ((unsigned long *)VA((*entry) & PAGE_MASK)) + index;
+    if (!((*entry) & 0x1))
+      *entry = alloc_page() | 0x3 | us;
   }
+
+  // pml1
+  short index = (from_va >> 12) & 0x1ff;
+  entry = ((unsigned long *)VA((*entry) & PAGE_MASK)) + index;
+  if (!((*entry) & 0x1))
+    *entry = to_pa | 0x3 | us;
 }
 
 void do_page_fault(unsigned long addr) {
   unsigned long pa = alloc_page();
-  map_range(current->pml4, addr, pa, 0x4, 1);
+  map_page(current->pml4, addr, pa, 0x4);
 }
 
 void mm_init() {

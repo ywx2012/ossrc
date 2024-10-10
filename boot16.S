@@ -54,9 +54,9 @@ _start:
         .word   0x8000
         // code32_start
         .long   0x100000
-        // ramdisk_image
+ramdisk_image:
         .long   0
-        // ramdisk_size
+ramdisk_size:
         .long   0
         // bootsect_kludge
         .long   0
@@ -202,8 +202,14 @@ start64:
   ret
 
         .globl e820
+        .globl initrd_base
+        .globl initrd_size
 e820:
         .quad e820_nr_entry - _start + 0x10200
+initrd_base:
+        .quad ramdisk_image - _start + 0x10200
+initrd_size:
+        .quad ramdisk_size - _start + 0x10200
 
 gdt:
   .quad 0x0000000000000000  /* reserved */
@@ -234,4 +240,5 @@ pml4:
         .align 0x1000, 0
 pml3:
   .quad 0x0000000000000083
+  .quad 0x0000000040000083
   .fill 511, 8, 0

@@ -13,6 +13,7 @@
 #define KERNEL_PAGE_NUM (1024 * 16)
 #define PAGE_SIZE 4096
 
+#define PAGE_MASK 0xffffffffff000
 #define PAGE_OFFSET 0xffff800000000000
 #define VA(x) ((void*)((unsigned long)(x) + PAGE_OFFSET))
 #define PA(x) ((unsigned long)(x) - PAGE_OFFSET)
@@ -41,4 +42,4 @@ unsigned long alloc_page();
 void free_page(unsigned long addr);
 void* malloc(int size);
 void free(void* obj);
-void map_range(unsigned long pml4_pa, unsigned long from_va, unsigned long to_pa, char us, long npage);
+void map_page(unsigned long pml4_pa, unsigned long from_va, unsigned long to_pa, char us);
