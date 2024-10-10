@@ -254,3 +254,7 @@ C头文件里有定义，完全没必要自己写
 *** 去掉app/libc/print.h
 
 和include/print.h重复了
+
+*** 合并Makefile里app目录下的规则
+
+重复了。顺便删除了没用到的app/app1.S, app/app2.S这两个文件。
