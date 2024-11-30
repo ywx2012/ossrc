@@ -18,17 +18,14 @@ int main() {
   vesa_init();
   atkbd_init();
 
-  // __asm__ ("sti");
   sched_init();
   tss_init();
-
-  __asm__ ("mov %0, %%cr3": :"r"(current->pml4));
-
   init_8254();
 
-  __asm__ ("movq %0, %%rsp\n\t"
-           "jmp ret_from_kernel\n\t"
-           :
-           : "m"(current->rsp0)
-          );
+  __asm__ ("mov %0, %%cr3": :"r"(current->pml4));
+  __asm__ ("mov %0, %%rsp": :"m"(current->rsp0));
+
+  __asm__ ("sti");
+
+  __asm__ ("jmp ret_from_kernel");
 }
