@@ -3,10 +3,19 @@
 
 #pragma once
 
+#include <stdint.h>
+
+struct interrupt_frame {
+  uintptr_t rip;
+  uintptr_t cs;
+  uintptr_t rflags;
+  uintptr_t rsp;
+  uintptr_t ss;
+};
+
 void init_8254();
 void interrupt_init();
 
-void timer_handler();
-void pf_handler();
-void kb_handler();
-
+void timer_handler(struct interrupt_frame *frame);
+void pf_handler(struct interrupt_frame *frame, uintptr_t error_code);
+void kb_handler(struct interrupt_frame *frame);

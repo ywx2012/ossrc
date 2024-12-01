@@ -5,6 +5,7 @@
 #include <print.h>
 #include <mm.h>
 #include <sched.h>
+#include <interrupt.h>
 
 char pages[MAX_PAGES];
 unsigned long mem_size = 0;
@@ -30,6 +31,14 @@ void map_page(unsigned long pml4_pa, unsigned long from_va, unsigned long to_pa,
 void do_page_fault(unsigned long addr) {
   unsigned long pa = alloc_page();
   map_page(current->pml4, addr, pa, 0x4);
+}
+
+__attribute__((interrupt))
+void
+pf_handler(struct interrupt_frame *frame, uintptr_t error_code) {
+  uintptr_t cr2;
+  __asm__("mov %%cr2, %0" : "=r"(cr2));
+  do_page_fault(cr2);
 }
 
 void mm_init() {

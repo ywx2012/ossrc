@@ -4,6 +4,7 @@
 #include <sys/io.h>
 #include <stdint.h>
 #include <print.h>
+#include <interrupt.h>
 
 // scancode set 2
 unsigned char keymap[256] = {
@@ -60,6 +61,13 @@ void process_kb() {
   }
 	
   print(keymap[scancode]);	
+}
+
+__attribute__((interrupt))
+void
+kb_handler(struct interrupt_frame *frame) {
+  process_kb();
+  outb(0x20, 0x20);
 }
 
 #define DATA_REG 0x60

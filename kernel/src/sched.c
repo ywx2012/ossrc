@@ -3,12 +3,14 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <sys/io.h>
 #include <mm.h>
 #include <sched.h>
 #include <segment.h>
 #include <print.h>
 #include <tss.h>
 #include <cpio.h>
+#include <interrupt.h>
 
 extern unsigned int *initrd_base;
 
@@ -94,7 +96,7 @@ void sched_init() {
   current = STRUCT_FROM_FIELD(struct task, task_node, task_list.next);
 }
 
-__attribute__((noipa,naked,optimize("omit-frame-pointer")))
+__attribute__((noipa,naked))
 void
 resume_task() {
   // switch cr3
@@ -125,8 +127,6 @@ void schedule() {
     current = next;
 
     resume_task();
-
-    __asm__ ("1:");
   }
 }
 
@@ -148,6 +148,13 @@ void do_timer() {
   }
 
   schedule();
+}
+
+__attribute__((interrupt))
+void
+timer_handler(struct interrupt_frame *frame) {
+  outb(0x20, 0x20);
+  do_timer();
 }
 
 int do_sleep(long ms) {

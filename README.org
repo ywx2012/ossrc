@@ -211,13 +211,15 @@ make run改用QEMU启动。
 
 app/libc/print.h, app/app1.S, app/app2.S
 
-*** 尽量使用系统自带的
+*** 尽量使用自带的
 
 include/types.h, include/string.h，app/libc/type.h定义的内容系统头文件里已经自带了，完全没必要自己定义一遍
 
 去掉C代码中inb/outb汇编，C头文件里有定义，完全没必要自己写。
 
 用__builtin_setjmp/__builtin_longjmp代替内联汇编
+
+中断函数改用C实现
 
 *** 统一目录结构，拆分Makefile
 

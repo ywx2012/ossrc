@@ -11,9 +11,9 @@ endif
 BUILDDIR ?= build
 SUBDIRS := $(wildcard */Makefile)
 TARGETS := $(BUILDDIR)/initrd.bin
-CFLAGS := $(shell gcc --help=common | grep -q cf-protection && echo '-fcf-protection=none') -fno-pic -fno-stack-protector -fno-builtin -std=c11
+CFLAGS := $(shell gcc --help=common | grep -q cf-protection && echo '-fcf-protection=none') -mgeneral-regs-only -fno-pic -fno-stack-protector -fno-builtin -std=c11
 USER_CFLAGS := $(CFLAGS)
-KERNEL_CFLAGS := $(CFLAGS) -mcmodel=large
+KERNEL_CFLAGS := $(CFLAGS) -mcmodel=large -mno-red-zone
 
 -include $(SUBDIRS)
 

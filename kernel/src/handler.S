@@ -51,36 +51,3 @@ system_call:
   pop %rsp
 
   sysretq
-
-timer_handler:
-  SAVE_CONTEXT
-
-  movb $0x20,%al
-  outb %al,$0x20
-
-  call do_timer
-
-  RESTORE_CONTEXT
-  iretq
-
-pf_handler:
-  SAVE_CONTEXT
-
-  mov %cr2, %rdi
-  call do_page_fault
-
-  RESTORE_CONTEXT
-  add $8, %rsp
-  iretq
-
-kb_handler:
-  SAVE_CONTEXT
-
-  call process_kb
-
-  movb $0x20,%al
-  outb %al,$0x20
-
-  RESTORE_CONTEXT
-  iretq
-
