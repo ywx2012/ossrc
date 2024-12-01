@@ -53,7 +53,7 @@ kvmtool支持一种独特的加载方式，当检测不出文件格式时，会�
 
 objcopy跳过.note.开头的section。有些发行版默认打开，会导致system.bin无法生成。
 
-删除 ~-fcf-protection=none~ ，因为有些发行版编译器不支持。
+因为有些发行版编译器不支持，检测到有这个选项再设置 ~-fcf-protection=none~ 。
 
 有的发行版无法编译 ~push $main~ 这行，改为 ~pushq $main~
 
