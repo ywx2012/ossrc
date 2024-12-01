@@ -1,11 +1,11 @@
 DIR := $(lastword $(MAKEFILE_LIST:/Makefile=))
-CFLAGS := $(CFLAGS) -I$(DIR)/include/uapi
+USER_CFLAGS := $(USER_CFLAGS) -I$(DIR)/include/uapi
 
 -include common.mk
 $(DIR)_TARGETS := $(BUILDDIR)/kernel.bin
 TARGETS := $(TARGETS) $($(DIR)_TARGETS)
 
-KERNEL_CFLAGS := -ffreestanding -std=c11 -I$(DIR)/include -I$(DIR)/include/uapi -fno-pic -mcmodel=large -fno-stack-protector -fno-builtin
+KERNEL_CFLAGS := $(KERNEL_CFLAGS) -I$(DIR)/include -I$(DIR)/include/uapi
 KERNEL_LDFLAGS := -nostdlib -Tkernel/linker.ld
 
 $(BUILDDIR)/kernel.bin: $($(DIR)_OBJS) | makedirs

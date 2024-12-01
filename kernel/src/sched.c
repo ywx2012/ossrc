@@ -67,8 +67,8 @@ static void make_task(unsigned long id, unsigned long entry, char *filename) {
   task->kstack = (unsigned long)VA(alloc_page()) + PAGE_SIZE;
   
   fake_task_stack(task->kstack);
-  task->rsp0 = task->kstack - 8 * 5;
-  task->rip = (unsigned long)&ret_from_kernel;
+  task->jmp_buf[2] = task->kstack - 8 * 5;
+  task->jmp_buf[1] = (unsigned long)&ret_from_kernel;
 
   list_insert(&task_list, &task->task_node);
 }
@@ -79,8 +79,8 @@ static void make_idle_task() {
   idle_task->state = TASK_RUNNING;
   idle_task->pml4 = TASK0_PML4;
   idle_task->kstack = (unsigned long)&task0_stack;
-  idle_task->rsp0 = (unsigned long)&task0_stack;
-  idle_task->rip = (unsigned long)&idle_task_entry;
+  idle_task->jmp_buf[2] = (unsigned long)&task0_stack;
+  idle_task->jmp_buf[1] = (unsigned long)&idle_task_entry;
 }
 
 void sched_init() {
@@ -92,6 +92,15 @@ void sched_init() {
   make_idle_task();
 
   current = STRUCT_FROM_FIELD(struct task, task_node, task_list.next);
+}
+
+__attribute__((noipa,naked,optimize("omit-frame-pointer")))
+void
+resume_task() {
+  // switch cr3
+  __asm__ ("mov %0, %%cr3" : : "a" (current->pml4));
+  // trigger
+  __builtin_longjmp(current->jmp_buf, 1);
 }
 
 void schedule() {
@@ -106,15 +115,8 @@ void schedule() {
   }
 
   if (next != current) {
-    __asm__ ("mov %%rsp, %0\n\t" /* save rsp */          \
-             "movabs $1f, %%rax\n\t"  /* save rip */     \
-             "mov %%rax, %1\n\t"                         \
-           "mov %2, %%rsp\n\t" /* restore rsp */       \
-           "push %3\n\t"       /* restore rip */       \
-           : "=m"(current->rsp0), "=m"(current->rip)    \
-           : "m"(next->rsp0), "m"(next->rip)  \
-             : "rax"
-    );
+    if (__builtin_setjmp(current->jmp_buf))
+      return;
 
     // switch kstack
     tss.rsp0 = (unsigned long)next->kstack;
@@ -122,10 +124,7 @@ void schedule() {
     // update current
     current = next;
 
-    // switch cr3
-    __asm__ ("mov %0, %%cr3" : : "a" (next->pml4));
-    // trigger
-    __asm__ ("ret");
+    resume_task();
 
     __asm__ ("1:");
   }

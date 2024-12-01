@@ -24,10 +24,5 @@ int main() {
   tss_init();
   init_8254();
 
-  __asm__ ("mov %0, %%cr3": :"r"(current->pml4));
-  __asm__ ("mov %0, %%rsp": :"m"(current->rsp0));
-
-  __asm__ ("sti");
-
-  __asm__ ("jmp ret_from_kernel");
+  resume_task();
 }

@@ -14,10 +14,10 @@ enum task_state {
 struct task {
   unsigned long id;
   enum task_state state;
-  unsigned long rip;
-  unsigned long rsp0;
+  uintptr_t reserved[2];
   unsigned long kstack;
   unsigned long pml4;
+  uintptr_t jmp_buf[5];
 
   struct node task_node;
 
@@ -31,3 +31,4 @@ extern unsigned long task0_stack;
 extern struct task* current;
 
 void sched_init();
+void resume_task();
