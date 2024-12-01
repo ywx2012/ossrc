@@ -199,86 +199,48 @@ xbps-install -S qemu-system-amd64
 
 ** ~mob~ 改动
 
-*** 去掉kvmtool
+*** 不再支持kvmtool
 
-改动Makefile。make run改用QEMU启动。
+去掉相关代码。
 
-*** 改用大页
+make run改用QEMU启动。
 
-映射从0开始的1G。虽然原始代码最多可支持4G内存。因为QEMU默认只开128M内存，完全不用担心。
+去掉VESA，反正QEMU不支持VESA。
 
-*** 去掉VESA
+*** 删除重复和没用到的文件
 
-反正QEMU不支持VESA，留着也没用
+app/libc/print.h, app/app1.S, app/app2.S
 
-*** boot16链接时起始地址应设为实际物理地址
+*** 尽量使用系统自带的
 
-~.word gdt, 1~ 那行很费解
+include/types.h, include/string.h，app/libc/type.h定义的内容系统头文件里已经自带了，完全没必要自己定义一遍
 
-*** 直接从16位跳到64位
+去掉C代码中inb/outb汇编，C头文件里有定义，完全没必要自己写。
 
-start64可以挪回原来0x100000的位置。boot32.S就不再需要了。
+*** 统一目录结构，拆分Makefile
 
-*** 去掉boot16.bin
-
-可以直接把boot16.o链接到
-
-*** 重用gdt
-
-跳64位时所需的gdt，和64位时是一样的，没必要重复定义，把start64和gdt都挪到boot16.S里，就可以直接用了。
-
-*** 去掉C代码中对pml4和e820的硬编码
-
-这样还能把页表挪到start64之后，避免未来加入更多内容后导致setup_sect超过上限。
-
-*** 去掉include/types.h
-
-完全没必要自己定义一遍
-
-*** 去掉C代码中inb/outb汇编
-
-C头文件里有定义，完全没必要自己写
-
-*** 去掉include/string.h
-
-完全没必要自己定义一遍
-
-*** 改成large code model
-
-这样内核可以放到任何位置，而不是只能缩到最后2G。这样页表也可以重用了。
-
-*** 去掉app/libc/type.h
-
-完全没必要自己定义一遍
-
-*** 去掉app/libc/print.h
-
-和include/print.h重复了
-
-*** 合并Makefile里app目录下的规则
-
-重复了。顺便删除了没用到的app/app1.S, app/app2.S这两个文件。
-
-*** app从initrd加载
-
-不再需要build.c了，改用cpio格式。
-
-*** 合并task和timer
-
-没有必要区分。顺便把双向链表代码统一了。
-
-*** 统一目录结构
-
-头文件都放include目录，C代码都放src目录。
-
-拆分Makefile，每个目录一个Makefile
-
-app用libc目录下的linker.ld链接，跳过elf，直接生成bin
+头文件都放include目录，C代码都放src目录，每个目录一个Makefile
 
 改进Makefile输出， ~make VERBOSE=1~ 才显示完整命令。因为命令变长了，一行显示不完。
 
 .depend文件拆成单独的.d
 
-*** 双向链表单独成一个文件
+*** 简化链接过程
 
-因为shm.c里也用了。顺便增加了FOREACH
+用链接脚本直接指定输出格式为binary，避免生成中间elf
+
+把内核所有文件，一次链接到kernel.bin
+
+生成cpio格式的initrd文件，而不是用build.c把所有文件拼成一个bin文件
+
+*** 简化启动过程
+
+直接从16位跳到64位，去掉boot32.S
+
+改用1G大页。改用large code model，这样内核可以放到任何位置，而不是只能缩在最后2G。简化初始页表的构造。
+
+*** 简化代码逻辑
+
+增加list.c实现双向链表，避免在不同的struct(task, timer, shm)里重复实现相同的逻辑。
+
+合并task和timer，这两者没必要区分。
