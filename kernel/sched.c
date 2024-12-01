@@ -29,14 +29,33 @@ struct cpio_newc_header {
 extern unsigned int *initrd_base;;
 extern unsigned int *initrd_size;
 
-static struct task* task_head;
-static struct task* task_tail;
+static struct node task_list;
+static struct node timer_list;
+
 struct task* current;
 struct task* idle_task;
 
 unsigned long ticks;
-struct timer* timer_head;
-struct timer* timer_tail;
+
+#define STRUCT_FROM_FIELD(type,field,ptr) ((type *)(((char *)ptr)-offsetof(type, field)))
+
+static void list_init(struct node *list) {
+  list->prev = list;
+  list->next = list;
+}
+
+static void list_insert(struct node *list, struct node *node) {
+  struct node *last = list->prev;
+  node->prev = last;
+  node->next = list;
+  last->next = node;
+  list->prev = node;
+}
+
+static void list_remove(struct node *node) {
+  node->prev->next = node->next;
+  node->next->prev = node->prev;
+}
 
 static void fake_task_stack(unsigned long kstack) {
   uint16_t ss = USER_DS;
@@ -111,24 +130,14 @@ static void make_task(unsigned long id, unsigned long entry, char *filename) {
     memcpy((char *)VA(entry_pa), p+offset, size);
     map_page(task->pml4, entry+offset, entry_pa, 0x4);
   }
-
+  
   task->kstack = (unsigned long)VA(alloc_page()) + PAGE_SIZE;
   
   fake_task_stack(task->kstack);
   task->rsp0 = task->kstack - 8 * 5;
   task->rip = (unsigned long)&ret_from_kernel;
 
-  if (!task_head) {
-    task_head = task;
-    task_tail = task;
-    task->prev = NULL;
-    task->next = NULL;
-  } else {
-    task_tail->next = task;
-    task->prev = task_tail;
-    task->next = NULL;
-    task_tail = task;
-  }
+  list_insert(&task_list, &task->task_node);
 }
 
 static void make_idle_task() {
@@ -142,25 +151,25 @@ static void make_idle_task() {
 }
 
 void sched_init() {
+  list_init(&task_list);
+  list_init(&timer_list);
+
   make_task(1, 0x100000, "app1.bin");
   make_task(2, 0x100000, "app2.bin");
   make_idle_task();
 
-  current = task_head; 
+  current = STRUCT_FROM_FIELD(struct task, task_node, task_list.next);
 }
 
 void schedule() {
-  struct task* next = NULL;
+  struct task* next = idle_task;
 
-  for (struct task* t = task_head; t; t = t->next) {
+  for (struct node *node=task_list.next; node!=&task_list; node=node->next) {
+    struct task *t = STRUCT_FROM_FIELD(struct task, task_node, node);
     if (t->state == TASK_RUNNING) {
       next = t;
       break;
     }
-  }
-
-  if (!next) {
-    next = idle_task;
   }
 
   if (next != current) {
@@ -193,68 +202,26 @@ void do_timer() {
   ticks++;
 
   // check timer
-  for (struct timer* t = timer_head; t; t = t->next) {
-    if (t->alarm <= ticks) {
-      t->task->state = TASK_RUNNING;
-
-      if (t == timer_head && t == timer_tail) {
-        timer_head = NULL;
-        timer_tail = NULL;
-      } else if (t == timer_head) {
-        timer_head = t->next;
-        t->next->prev = NULL;
-      } else if (t == timer_tail) {
-        timer_tail = t->prev;
-        t->prev->next = NULL;
-      } else {
-        t->prev->next = t->next;
-        t->next->prev = t->prev;
-      }
-
-      free(t);
-    }
+  for (struct node *node=timer_list.next; node!=&timer_list; node=node->next) {
+    struct task *t = STRUCT_FROM_FIELD(struct task, timer_node, node);
+    if (t->alarm > ticks)
+      continue;
+    t->state = TASK_RUNNING;
+    list_remove(node);
   }
 
   if (current != idle_task) {
-    if (current != task_tail) {
-      if (current->prev) {
-        current->prev->next = current->next;
-      }
-      current->next->prev = current->prev;
-
-      current->prev = task_tail;
-      task_tail->next = current;
-
-      if (current == task_head) {
-        task_head = current->next;
-      }
-      task_tail = current;
-
-      current->next = NULL;
-    }
+    list_remove(&current->task_node);
+    list_insert(&task_list, &current->task_node);
   }
 
   schedule();
 }
 
 int do_sleep(long ms) {
-  struct timer* t = malloc(sizeof(struct timer));
-  t->task = current;
-  t->alarm = ticks + ms / 10;
-
-  if (!timer_head) {
-    timer_head = t;
-    timer_tail = t;
-    t->prev = t->next = NULL;
-  } else {
-    timer_tail->next = t;
-    t->prev = timer_tail;
-    t->next = NULL;
-    timer_tail = t;
-  }
-
+  current->alarm = ticks + ms / 10;
+  list_insert(&timer_list, &current->timer_node);
   current->state = TASK_INTERRUPTIBLE;
   schedule();
-
   return 0;
 }

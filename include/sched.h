@@ -10,6 +10,11 @@ enum task_state {
   TASK_INTERRUPTIBLE
 };
 
+struct node {
+  struct node *prev;
+  struct node *next;
+};
+
 struct task {
   unsigned long id;
   enum task_state state;
@@ -18,15 +23,10 @@ struct task {
   unsigned long kstack;
   unsigned long pml4;
 
-  struct task* next;
-  struct task* prev;
-};
+  struct node task_node;
 
-struct timer {
   unsigned long alarm;
-  struct task* task;
-  struct timer* next;
-  struct timer* prev;
+  struct node timer_node;
 };
 
 extern unsigned long ret_from_kernel;
