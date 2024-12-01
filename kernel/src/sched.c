@@ -8,26 +8,9 @@
 #include <segment.h>
 #include <print.h>
 #include <tss.h>
+#include <cpio.h>
 
-struct cpio_newc_header {
-  char    c_magic[6];
-  char    c_ino[8];
-  char    c_mode[8];
-  char    c_uid[8];
-  char    c_gid[8];
-  char    c_nlink[8];
-  char    c_mtime[8];
-  char    c_filesize[8];
-  char    c_devmajor[8];
-  char    c_devminor[8];
-  char    c_rdevmajor[8];
-  char    c_rdevminor[8];
-  char    c_namesize[8];
-  char    c_check[8];
-};
-
-extern unsigned int *initrd_base;;
-extern unsigned int *initrd_size;
+extern unsigned int *initrd_base;
 
 static struct node task_list;
 static struct node timer_list;
@@ -56,37 +39,6 @@ static void fake_task_stack(unsigned long kstack) {
            : "m"(ss), "m"(rsp), "m"(cs), "m"(rip), "m"(kstack), "m"(rsp_tmp));
 }
 
-static unsigned long decode_size(char *size) {
-  unsigned long acc = 0;
-  for (int i=0; i<8; i++) {
-    acc <<= 4;
-    if (size[i] <= '9') {
-      acc |= (size[i] - '0');
-    } else if (size[i] <= 'F') {
-      acc |= (size[i] - 'A') + 10;
-    } else {
-      acc |= (size[i] - 'a') + 10;
-    }
-  }
-  return acc;
-}
-
-static struct cpio_newc_header *lookup_initrd(char *filename) {
-  unsigned long base = *initrd_base;
-  struct cpio_newc_header *cpio = (struct cpio_newc_header *)base;
-
-  while (strcmp((char *)&cpio[1], "TRAILER!!!")) {
-    if (strcmp((char *)&cpio[1], filename) == 0)
-      return cpio;
-
-    unsigned long headersize = (sizeof(struct cpio_newc_header) + decode_size(cpio->c_namesize) + 3) / 4 * 4;
-    unsigned long filesize = (decode_size(cpio->c_filesize) + 3) / 4 * 4;
-    cpio = (struct cpio_newc_header *)(((char *)cpio) + headersize + filesize);
-  }
-
-  return NULL;
-}
-
 static void make_task(unsigned long id, unsigned long entry, char *filename) {
   struct task* task = malloc(sizeof(struct task));
   task->id = id;
@@ -97,10 +49,11 @@ static void make_task(unsigned long id, unsigned long entry, char *filename) {
 
   memcpy(VA(task->pml4 + 8 * 256), VA(TASK0_PML4 + 8 * 256), 8 * 256);
 
-  struct cpio_newc_header *cpio = lookup_initrd(filename);
-  unsigned long headersize = (sizeof(struct cpio_newc_header) + decode_size(cpio->c_namesize) + 3) / 4 * 4;
-  unsigned long filesize = (decode_size(cpio->c_filesize) + 3) / 4 * 4;
-  char *p = ((char *)cpio) + headersize;
+  unsigned long base = *initrd_base;
+  struct cpio_newc_header const *cpio = (struct cpio_newc_header const *)base;
+  cpio = cpio_lookup(cpio, filename);
+  unsigned long filesize = cpio_get_size(cpio);
+  char const *p = cpio_get_content(cpio);
 
   for (unsigned long offset=0; offset<filesize; offset+=PAGE_SIZE) {
     unsigned long entry_pa = alloc_page();

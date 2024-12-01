@@ -261,7 +261,7 @@ C头文件里有定义，完全没必要自己写
 
 *** app从initrd加载
 
-不再需要build.c了
+不再需要build.c了，改用cpio格式。
 
 *** 合并task和timer
 
