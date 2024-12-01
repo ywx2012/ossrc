@@ -1,51 +1,37 @@
-CFLAGS = -std=c11 -I. -fno-pic -mcmodel=large -fno-stack-protector -fno-builtin
-SRCS = main.c $(wildcard mm/*.c) $(wildcard lib/*.c) $(wildcard kernel/*.c) $(wildcard ipc/*.c) \
-			 $(wildcard drivers/*.c)
-OBJS = boot16.o head64.o kernel/handler.o $(SRCS:.c=.o)
-APPS = $(wildcard app/*.c)
+ifeq ($(VERBOSE), 1)
+  V=
+  Q=
+else
+  V=@echo GEN $@;
+  Q=@
+endif
 
-all: kernel.bin initrd.bin
+.DEFAULT_GOAL := all
 
-initrd.bin: $(APPS:%.c=%.bin)
-	printf '%s\n' ${^:app/%=%} | cpio -D app -ov --format=newc > $@
+BUILDDIR ?= build
+SUBDIRS := $(wildcard */Makefile)
+TARGETS := $(BUILDDIR)/initrd.bin
 
-kernel.bin: $(OBJS)
-	ld -Ttext=0xffff8000000ff000 $(OBJS) -o system.elf
-	objcopy -R .note.* -O binary system.elf $@
+-include $(SUBDIRS)
 
-.depend: $(SRCS)
-	@rm -f .depend
-	@$(foreach src,$(SRCS), \
-		echo -n $(dir $(src)) >> .depend; \
-		gcc -I. -MM $(src) >> .depend; \
-	)
-include .depend
+$(BUILDDIR)/initrd.bin: $(app_TARGETS) | makedirs
+	$(V)printf '%s\n' $(notdir $^) | cpio -D $(dir $<) -ov --format=newc > $@
 
-# libc
-app/libc/libc.o: app/libc/syscall.o
-	ld -r -o $@ $^
+DEPS := $(OBJS:%.o=%.d)
 
-# libdraw
-app/libdraw/%.o: app/libdraw/%.c
-	gcc -I. -c -o $@ $^
+all: $(TARGETS)
 
-app/libdraw/libdraw.o: app/libdraw/draw.o app/libdraw/fonts.o
-	ld -r -o $@ $^
+libs: $(LIBS)
 
-# app
-app/%.o: app/%.c
-	gcc -fno-stack-protector -I. -c -o $@ $<
-
-app/%.bin: app/libc/start.o app/%.o app/libc/libc.o app/libdraw/libdraw.o
-	ld -Ttext=0x100000 $^ -o $(@:.bin=.elf)
-	objcopy -R .note.* -O binary $(@:.bin=.elf) $@
-
-.PHONY: clean run
-.PRECIOUS: $(APPS:%.c=%.o)
-
-run: kernel.bin initrd.bin
-	qemu-system-x86_64 -kernel ./kernel.bin -initrd ./initrd.bin
+makedirs:
+	$(Q)mkdir -p $(dir $(TARGETS) $(OBJS))
 
 clean:
-	find -name "*.o" -o -name "*.elf" -o -name "*.bin" | xargs rm -f
-	rm -f build .depend
+	rm -f $(TARGETS) $(LIBS) $(OBJS) $(DEPS)
+
+run: $(TARGETS)
+	qemu-system-x86_64 -kernel $(BUILDDIR)/kernel.bin -initrd $(BUILDDIR)/initrd.bin
+
+.PRECIOUS: $(OBJS)
+
+-include $(DEPS)

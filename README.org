@@ -266,3 +266,15 @@ C头文件里有定义，完全没必要自己写
 *** 合并task和timer
 
 没有必要区分。顺便把双向链表代码统一了。
+
+*** 统一目录结构
+
+头文件都放include目录，C代码都放src目录。
+
+拆分Makefile，每个目录一个Makefile
+
+app用libc目录下的linker.ld链接，跳过elf，直接生成bin
+
+改进Makefile输出， ~make VERBOSE=1~ 才显示完整命令。因为命令变长了，一行显示不完。
+
+.depend文件拆成单独的.d
