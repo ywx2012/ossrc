@@ -37,26 +37,6 @@ struct task* idle_task;
 
 unsigned long ticks;
 
-#define STRUCT_FROM_FIELD(type,field,ptr) ((type *)(((char *)ptr)-offsetof(type, field)))
-
-static void list_init(struct node *list) {
-  list->prev = list;
-  list->next = list;
-}
-
-static void list_insert(struct node *list, struct node *node) {
-  struct node *last = list->prev;
-  node->prev = last;
-  node->next = list;
-  last->next = node;
-  list->prev = node;
-}
-
-static void list_remove(struct node *node) {
-  node->prev->next = node->next;
-  node->next->prev = node->prev;
-}
-
 static void fake_task_stack(unsigned long kstack) {
   uint16_t ss = USER_DS;
   unsigned long rsp = 0x8000000;
@@ -164,7 +144,7 @@ void sched_init() {
 void schedule() {
   struct task* next = idle_task;
 
-  for (struct node *node=task_list.next; node!=&task_list; node=node->next) {
+  FOREACH(node, task_list) {
     struct task *t = STRUCT_FROM_FIELD(struct task, task_node, node);
     if (t->state == TASK_RUNNING) {
       next = t;
@@ -202,7 +182,7 @@ void do_timer() {
   ticks++;
 
   // check timer
-  for (struct node *node=timer_list.next; node!=&timer_list; node=node->next) {
+  FOREACH(node, timer_list) {
     struct task *t = STRUCT_FROM_FIELD(struct task, timer_node, node);
     if (t->alarm > ticks)
       continue;

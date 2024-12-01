@@ -6,22 +6,27 @@
 #include <string.h>
 #include <mm.h>
 #include <sched.h>
+#include <list.h>
 
 struct shm {
   char* name;
   unsigned long page;
-	
-  struct shm* next;
+  struct node shm_node;
 };
 
-struct shm* shm_head;
-struct shm* shm_tail;
+struct node shm_list;
+
+void
+shm_init(void) {
+  list_init(&shm_list);
+}
 
 int do_shm(char* name) {
   struct shm* shm = NULL;
   unsigned long va = 0x4000000;
 
-  for (struct shm* s = shm_head; s; s = s->next) {
+  FOREACH(node, shm_list) {
+    struct shm * s=STRUCT_FROM_FIELD(struct shm, shm_node, node);
     if (!strcmp(s->name, name)) {
       shm = s;
       break;
@@ -35,15 +40,7 @@ int do_shm(char* name) {
     memcpy(shm->name, name, len);
     shm->name[len] = '\0';  
     shm->page = alloc_page();
-    shm->next = NULL;
-
-    if (shm_head == NULL) {
-      shm_head = shm;
-      shm_tail = shm;
-    } else {
-      shm_tail->next = shm;
-      shm_tail = shm;
-    }
+    list_insert(&shm_list, &shm->shm_node);
   }
 
   map_page(current->pml4, va, shm->page, 0x4);

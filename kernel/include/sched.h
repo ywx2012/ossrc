@@ -4,15 +4,11 @@
 #pragma once
 
 #include <stdint.h>
+#include <list.h>
 
 enum task_state {
   TASK_RUNNING = 0,
   TASK_INTERRUPTIBLE
-};
-
-struct node {
-  struct node *prev;
-  struct node *next;
 };
 
 struct task {

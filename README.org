@@ -278,3 +278,7 @@ app用libc目录下的linker.ld链接，跳过elf，直接生成bin
 改进Makefile输出， ~make VERBOSE=1~ 才显示完整命令。因为命令变长了，一行显示不完。
 
 .depend文件拆成单独的.d
+
+*** 双向链表单独成一个文件
+
+因为shm.c里也用了。顺便增加了FOREACH

@@ -8,6 +8,7 @@
 #include <segment.h>
 #include <interrupt.h>
 #include <syscall.h>
+#include <shm.h>
 #include <vesa.h>
 #include <atkbd.h>
 
@@ -15,6 +16,7 @@ int main() {
   mm_init();
   interrupt_init();
   syscall_init(); 
+  shm_init();
   vesa_init();
   atkbd_init();
 
