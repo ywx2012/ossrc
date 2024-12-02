@@ -120,20 +120,6 @@ e820_rd_entry:
   cmp $0, %ebx
   jne e820_rd_entry
 
-  # Init 8259A
-  # ICW1
-  mov $0x13, %al
-  mov $(IO_PIC), %dx
-  out %al,%dx
-  # ICW2
-  mov $(IRQ_OFFSET), %al
-  mov $(IO_PIC+1), %dx
-  out %al, %dx
-  # ICW4
-  mov $0x1, %al
-  mov $(IO_PIC+1), %dx
-  out %al, %dx
-
   lgdt (gdtr16-_start+0x200)
 
   xorl %eax, %eax

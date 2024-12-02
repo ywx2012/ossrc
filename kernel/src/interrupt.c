@@ -6,7 +6,9 @@
 #include <string.h>
 #include <interrupt.h>
 #include <segment.h>
+#include <x86/pic.h>
 
+#define IRQ_OFFSET 0x20
 #define COUNTER (1193181 / 100)
 #define GATE_INTERRUPT 0xe
 #define GATE_EXCEPTION 0xf
@@ -43,6 +45,10 @@ static void set_gate(unsigned char index, unsigned long addr, char type) {
 
 void interrupt_init() {
   set_gate(14, (unsigned long)&pf_handler, GATE_EXCEPTION);
-  set_gate(0x20, (unsigned long)&timer_handler, GATE_INTERRUPT);
-  set_gate(0x21, (unsigned long)&kb_handler, GATE_INTERRUPT);
+  set_gate(IRQ_OFFSET+IRQ_PIT0, (unsigned long)&timer_handler, GATE_INTERRUPT);
+  set_gate(IRQ_OFFSET+IRQ_KBD, (unsigned long)&kb_handler, GATE_INTERRUPT);
+
+  pic_init(IRQ_OFFSET, IRQ_OFFSET+0x8);
+  pic_enable(IRQ_PIT0);
+  pic_enable(IRQ_KBD);
 }
