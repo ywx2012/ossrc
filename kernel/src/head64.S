@@ -19,7 +19,12 @@ ret_from_kernel:
   movw %ax, %es
   movw %ax, %fs
   movw %ax, %gs
-  iretq
+
+  mov $0x100000, %rcx
+  mov $0x200, %r11
+  mov $0x8000000, %rsp
+
+  sysretq
 
 idle_task_entry:
 1:

@@ -22,25 +22,6 @@ struct task* idle_task;
 
 unsigned long ticks;
 
-static void fake_task_stack(unsigned long kstack) {
-  uint16_t ss = USER_DS;
-  unsigned long rsp = 0x8000000;
-  uint16_t cs = USER_CS;
-  unsigned long rip = 0x100000;
-
-  unsigned long rsp_tmp;
-  __asm__ ("mov %%rsp, %5\n\t"
-           "mov %4, %%rsp\n\t"
-           "pushq %0\n\t"
-           "pushq %1\n\t"
-           "pushf\n\t"
-           "pushq %2\n\t"
-           "pushq %3\n\t"
-           "mov %5, %%rsp\n\t"
-           :
-           : "m"(ss), "m"(rsp), "m"(cs), "m"(rip), "m"(kstack), "m"(rsp_tmp));
-}
-
 static void make_task(unsigned long id, unsigned long entry, char *filename) {
   struct task* task = malloc(sizeof(struct task));
   task->id = id;
@@ -68,7 +49,6 @@ static void make_task(unsigned long id, unsigned long entry, char *filename) {
   
   task->kstack = (unsigned long)VA(alloc_page()) + PAGE_SIZE;
   
-  fake_task_stack(task->kstack);
   task->jmp_buf[2] = task->kstack - 8 * 5;
   task->jmp_buf[1] = (unsigned long)&ret_from_kernel;
 
