@@ -3,13 +3,12 @@
 
 #include <string.h>
 #include <print.h>
+#include <frame.h>
+#include <bsp.h>
 #include <mm.h>
 #include <sched.h>
 #include <interrupt.h>
 #include <setup.h>
-
-char pages[MAX_PAGES];
-unsigned long mem_size = 0;
 
 void map_page(unsigned long pml4_pa, unsigned long from_va, unsigned long to_pa, char us) {
   unsigned long *entry = &pml4_pa;
@@ -17,14 +16,14 @@ void map_page(unsigned long pml4_pa, unsigned long from_va, unsigned long to_pa,
 
   for (int i=0; i<3; ++i) {
     short index = (from_va >> offsets[i]) & 0x1ff;
-    entry = ((unsigned long *)VA((*entry) & PAGE_MASK)) + index;
+    entry = ((unsigned long *)va_from_pa((*entry) & PAGE_MASK)) + index;
     if (!((*entry) & 0x1))
       *entry = alloc_page() | 0x3 | us;
   }
 
   // pml1
   short index = (from_va >> 12) & 0x1ff;
-  entry = ((unsigned long *)VA((*entry) & PAGE_MASK)) + index;
+  entry = ((unsigned long *)va_from_pa((*entry) & PAGE_MASK)) + index;
   if (!((*entry) & 0x1))
     *entry = to_pa | 0x3 | us;
 }
@@ -40,21 +39,4 @@ pf_handler(struct interrupt_frame *frame, uintptr_t error_code) {
   uintptr_t cr2;
   __asm__("mov %%cr2, %0" : "=r"(cr2));
   do_page_fault(cr2);
-}
-
-void mm_init() {
-  for (int i = 0; i < e820map.nr_map; i++) {
-    if (e820map.map[i].type == E820_RAM) {
-      uintptr_t tmp = e820map.map[i].addr + e820map.map[i].size;
-      if (tmp > mem_size) {
-        mem_size = tmp;
-      }
-    }
-  }
-
-  memset(pages, 0, MAX_PAGES);
-
-  for (int i = 0; i < KERNEL_PAGE_NUM; i++) {
-    pages[i] = 1;
-  }
 }

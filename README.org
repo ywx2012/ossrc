@@ -159,8 +159,10 @@ dnf install --setopt=install_weak_deps=False qemu-system-x86-core
 
 ***** 安装编译工具
 
+gcc默认是7，至少需要10才可以
+
 #+BEGIN_SRC sh :tangle tmp/compile/opensuse
-zypper install --no-recommends make gcc cpio
+zypper install --no-recommends make gcc10 cpio && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
 #+END_SRC
 
 ***** 安装QEMU

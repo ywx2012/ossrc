@@ -3,7 +3,10 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/io.h>
+#include <frame.h>
+#include <bsp.h>
 #include <mm.h>
 #include <sched.h>
 #include <segment.h>
@@ -11,7 +14,6 @@
 #include <tss.h>
 #include <cpio.h>
 #include <interrupt.h>
-#include <setup.h>
 
 static struct node task_list;
 static struct node timer_list;
@@ -26,28 +28,28 @@ static void make_task(unsigned long id, unsigned long entry, char *filename) {
   task->id = id;
   task->state = TASK_RUNNING;
 
-  task->pml4 = alloc_page();
-  memset(VA(task->pml4), 0, PAGE_SIZE);
+  char *page = (char *)frame_alloc();
+  task->pml4 = pa_from_va((uintptr_t)page);
+  memset(page, 0, PAGE_SIZE);
 
-  memcpy(VA(task->pml4 + 8 * 256), VA(TASK0_PML4 + 8 * 256), 8 * 256);
+  memcpy(page + 8 * 256, pml4 + 8 * 256, 8 * 256);
 
-  uintptr_t ramdisk_image = setup_header.ramdisk_image;
-  struct cpio_newc_header const *cpio = (struct cpio_newc_header const *)ramdisk_image;
+  struct cpio_newc_header const *cpio = initrd;
 
   cpio = cpio_lookup(cpio, filename);
   unsigned long filesize = cpio_get_size(cpio);
   char const *p = cpio_get_content(cpio);
 
   for (unsigned long offset=0; offset<filesize; offset+=PAGE_SIZE) {
-    unsigned long entry_pa = alloc_page();
+    void *page = frame_alloc();
     unsigned long size = filesize - offset;
     if (size > PAGE_SIZE)
       size = PAGE_SIZE;
-    memcpy((char *)VA(entry_pa), p+offset, size);
-    map_page(task->pml4, entry+offset, entry_pa, 0x4);
+    memcpy(page, p+offset, size);
+    map_page(task->pml4, entry+offset, pa_from_va((uintptr_t)page), 0x4);
   }
   
-  task->kstack = (unsigned long)VA(alloc_page()) + PAGE_SIZE;
+  task->kstack = ((uintptr_t)frame_alloc()) + PAGE_SIZE;
   
   task->jmp_buf[2] = task->kstack - 8 * 5;
   task->jmp_buf[1] = (unsigned long)&ret_from_kernel;
@@ -59,7 +61,7 @@ static void make_idle_task() {
   idle_task = malloc(sizeof(struct task));
   idle_task->id = 0;
   idle_task->state = TASK_RUNNING;
-  idle_task->pml4 = TASK0_PML4;
+  idle_task->pml4 = pa_from_va((uintptr_t)pml4);
   idle_task->kstack = (unsigned long)&task0_stack;
   idle_task->jmp_buf[2] = (unsigned long)&task0_stack;
   idle_task->jmp_buf[1] = (unsigned long)&idle_task_entry;

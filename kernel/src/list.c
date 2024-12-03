@@ -7,12 +7,12 @@ list_init(struct node *list) {
 }
 
 void
-list_insert(struct node *list, struct node *node) {
-  struct node *last = list->prev;
-  node->prev = last;
-  node->next = list;
-  last->next = node;
-  list->prev = node;
+list_insert(struct node *anchor, struct node *node) {
+  struct node *prev = anchor->prev;
+  node->prev = prev;
+  node->next = anchor;
+  prev->next = node;
+  anchor->prev = node;
 }
 
 void

@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 #include <mm.h>
 #include <sched.h>
 #include <list.h>

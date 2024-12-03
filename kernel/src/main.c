@@ -13,7 +13,6 @@
 #include <atkbd.h>
 
 int main() {
-  mm_init();
   interrupt_init();
   syscall_init(); 
   shm_init();

@@ -9,5 +9,5 @@ struct node {
 #define FOREACH(var,list) for (struct node *var=list.next; var!=&list; var=var->next)
 
 void list_init(struct node *list);
-void list_insert(struct node *list, struct node *node);
+void list_insert(struct node *anchor, struct node *node);
 void list_remove(struct node *node);

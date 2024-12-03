@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <mm.h>
+#include <frame.h>
 #include <print.h>
 
 struct bucket_desc {
@@ -51,7 +51,7 @@ void* malloc(int size) {
   }
   
   if (bdesc == NULL) {
-    bdesc = VA(alloc_page());
+    bdesc = frame_alloc();
     bdesc->freeptr = (void*)((unsigned long)bdesc + sizeof(struct bucket_desc));
     bdesc->next = NULL;
     bdesc->refcnt = 0;
@@ -110,6 +110,6 @@ free_page:
       prev->next = tmp->next;
     }
 
-    free_page(PA(bdesc));
+    frame_free(bdesc);
   }
 }
