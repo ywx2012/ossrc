@@ -5,9 +5,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/io.h>
+#include <paging.h>
 #include <frame.h>
 #include <bsp.h>
-#include <mm.h>
 #include <sched.h>
 #include <segment.h>
 #include <print.h>
@@ -28,11 +28,8 @@ static void make_task(unsigned long id, unsigned long entry, char *filename) {
   task->id = id;
   task->state = TASK_RUNNING;
 
-  char *page = (char *)frame_alloc();
-  task->pml4 = pa_from_va((uintptr_t)page);
-  memset(page, 0, PAGE_SIZE);
-
-  memcpy(page + 8 * 256, pml4 + 8 * 256, 8 * 256);
+  uintptr_t *page_table = paging_alloc_table();
+  task->pml4 = page_table;
 
   struct cpio_newc_header const *cpio = initrd;
 
@@ -41,12 +38,11 @@ static void make_task(unsigned long id, unsigned long entry, char *filename) {
   char const *p = cpio_get_content(cpio);
 
   for (unsigned long offset=0; offset<filesize; offset+=PAGE_SIZE) {
-    void *page = frame_alloc();
+    void *page = paging_alloc_page(task->pml4, entry+offset, PTE_W|PTE_U);
     unsigned long size = filesize - offset;
     if (size > PAGE_SIZE)
       size = PAGE_SIZE;
     memcpy(page, p+offset, size);
-    map_page(task->pml4, entry+offset, pa_from_va((uintptr_t)page), 0x4);
   }
   
   task->kstack = ((uintptr_t)frame_alloc()) + PAGE_SIZE;
@@ -61,7 +57,7 @@ static void make_idle_task() {
   idle_task = malloc(sizeof(struct task));
   idle_task->id = 0;
   idle_task->state = TASK_RUNNING;
-  idle_task->pml4 = pa_from_va((uintptr_t)pml4);
+  idle_task->pml4 = pml4;
   idle_task->kstack = (unsigned long)&task0_stack;
   idle_task->jmp_buf[2] = (unsigned long)&task0_stack;
   idle_task->jmp_buf[1] = (unsigned long)&idle_task_entry;
@@ -81,8 +77,9 @@ void sched_init() {
 __attribute__((noipa,naked))
 void
 resume_task() {
+  uintptr_t pa = pa_from_va((uintptr_t)current->pml4);
   // switch cr3
-  __asm__ ("mov %0, %%cr3" : : "a" (current->pml4));
+  __asm__ ("mov %0, %%cr3" : : "a" (pa));
   // trigger
   __builtin_longjmp(current->jmp_buf, 1);
 }

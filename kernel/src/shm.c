@@ -5,13 +5,14 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-#include <mm.h>
 #include <sched.h>
 #include <list.h>
+#include <frame.h>
+#include <paging.h>
 
 struct shm {
   char* name;
-  unsigned long page;
+  void *page;
   struct node shm_node;
 };
 
@@ -40,11 +41,11 @@ int do_shm(char* name) {
     shm->name = malloc(len + 1);
     memcpy(shm->name, name, len);
     shm->name[len] = '\0';  
-    shm->page = alloc_page();
+    shm->page = frame_alloc();
     list_insert(&shm_list, &shm->shm_node);
   }
 
-  map_page(current->pml4, va, shm->page, 0x4);
+  paging_map_page(current->pml4, va, shm->page, PTE_W|PTE_U);
 
   return va;
 }

@@ -29,7 +29,7 @@ extern size_t initrd_size;
 
 extern struct node region_list;
 
-extern char pml4[PAGE_SIZE];
+extern uintptr_t pml4[PAGE_SIZE/sizeof(uintptr_t)];
 
 void frame_init(void);
 

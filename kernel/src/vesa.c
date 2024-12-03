@@ -4,8 +4,8 @@
 #include <string.h>
 #include <vesa.h>
 #include <bochs.h>
-#include <mm.h>
 #include <sched.h>
+#include <paging.h>
 
 struct mode_info vesa_mode_info;
 
@@ -27,7 +27,7 @@ unsigned long do_fbmap() {
   unsigned long pa = vesa_mode_info.fbbase;
   unsigned long size = vesa_mode_info.hres * vesa_mode_info.vres * vesa_mode_info.bpp / 8;
   for(unsigned long offset = 0; offset<size; offset+=PAGE_SIZE)
-    map_page(current->pml4, va+offset, pa+offset, 0x4);
+    paging_map_addr(current->pml4, va+offset, pa+offset, PTE_W|PTE_U);
 
   return va;
 }

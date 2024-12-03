@@ -16,7 +16,7 @@ struct task {
   enum task_state state;
   uintptr_t reserved[2];
   unsigned long kstack;
-  unsigned long pml4;
+  uintptr_t *pml4;
   uintptr_t jmp_buf[5];
 
   struct node task_node;
