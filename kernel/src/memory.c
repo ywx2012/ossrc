@@ -6,6 +6,7 @@
 #include <mm.h>
 #include <sched.h>
 #include <interrupt.h>
+#include <setup.h>
 
 char pages[MAX_PAGES];
 unsigned long mem_size = 0;
@@ -42,9 +43,9 @@ pf_handler(struct interrupt_frame *frame, uintptr_t error_code) {
 }
 
 void mm_init() {
-  for (int i = 0; i < e820->nr_entry; i++) {
-    if (e820->map[i].type == E820_RAM) {
-      unsigned long tmp = e820->map[i].addr + e820->map[i].size;
+  for (int i = 0; i < e820map.nr_map; i++) {
+    if (e820map.map[i].type == E820_RAM) {
+      uintptr_t tmp = e820map.map[i].addr + e820map.map[i].size;
       if (tmp > mem_size) {
         mem_size = tmp;
       }

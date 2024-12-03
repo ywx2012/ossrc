@@ -3,9 +3,6 @@
 
 .text
 .code64
-.globl timer_handler
-.globl pf_handler
-.globl kb_handler
 .globl system_call
 
 .macro SAVE_CONTEXT save_rax = 1

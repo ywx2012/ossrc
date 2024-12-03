@@ -11,8 +11,7 @@
 #include <tss.h>
 #include <cpio.h>
 #include <interrupt.h>
-
-extern unsigned int *initrd_base;
+#include <setup.h>
 
 static struct node task_list;
 static struct node timer_list;
@@ -32,8 +31,9 @@ static void make_task(unsigned long id, unsigned long entry, char *filename) {
 
   memcpy(VA(task->pml4 + 8 * 256), VA(TASK0_PML4 + 8 * 256), 8 * 256);
 
-  unsigned long base = *initrd_base;
-  struct cpio_newc_header const *cpio = (struct cpio_newc_header const *)base;
+  uintptr_t ramdisk_image = setup_header.ramdisk_image;
+  struct cpio_newc_header const *cpio = (struct cpio_newc_header const *)ramdisk_image;
+
   cpio = cpio_lookup(cpio, filename);
   unsigned long filesize = cpio_get_size(cpio);
   char const *p = cpio_get_content(cpio);

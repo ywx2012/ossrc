@@ -21,14 +21,5 @@ struct tss {
   uint8_t io_bitmap[IO_BITMAP_BYTES + 1];
 } __attribute__((packed));
 
-struct tss_desc {
-  uint16_t limit0;
-  uint16_t base0;
-  uint16_t base1 : 8, type : 4, desc_type : 1, dpl : 2, p : 1;
-  uint16_t limit1 : 4, avl : 1, zero0 : 2, g : 1, base2 : 8;
-  uint32_t base3;
-  uint32_t zero1;
-} __attribute__((packed));
-
 extern struct tss tss;
 void tss_init();

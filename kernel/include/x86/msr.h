@@ -13,18 +13,9 @@
 __attribute__((always_inline))
 static
 inline
-uint64_t
-rdmsr(uint32_t msr) {
-  uint64_t lo;
-  uint64_t hi;
-  __asm__("rdmsr" : "=a"(lo), "=d"(hi) : "c"(msr));
-  return (hi<<32)|lo;
-}
-
-__attribute__((always_inline))
-static
-inline
 void
 wrmsr(uint32_t msr, uint64_t value) {
-  __asm__("wrmsr" : : "c"(msr), "a"(value&0xFFFFFFFF), "d"(value>>32));
+  uint32_t lo = value&0xFFFFFFFF;
+  uint32_t hi = (value>>32)&0xFFFFFFFF;
+  __asm__("wrmsr" : : "c"(msr), "a"(lo), "d"(hi));
 }

@@ -7,6 +7,7 @@
 #include <interrupt.h>
 #include <segment.h>
 #include <x86/pic.h>
+#include <x86/segment.h>
 
 #define IRQ_OFFSET 0x20
 #define COUNTER (1193181 / 100)
@@ -47,6 +48,12 @@ void interrupt_init() {
   set_gate(14, (unsigned long)&pf_handler, GATE_EXCEPTION);
   set_gate(IRQ_OFFSET+IRQ_PIT0, (unsigned long)&timer_handler, GATE_INTERRUPT);
   set_gate(IRQ_OFFSET+IRQ_KBD, (unsigned long)&kb_handler, GATE_INTERRUPT);
+
+  static struct dtr IDTR __attribute__((aligned(16))) = {
+    .base = (uintptr_t)idt_table,
+    .limit = sizeof(idt_table) - 1,
+  };
+  __asm__("lidt %0" : : "m"(IDTR));
 
   pic_init(IRQ_OFFSET, IRQ_OFFSET+0x8);
   pic_enable(IRQ_PIT0);

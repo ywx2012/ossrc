@@ -5,8 +5,8 @@
 #include <tss.h>
 #include <segment.h>
 #include <sched.h>
+#include <bsp.h>
 
-extern unsigned long gdt[64];
 struct tss tss;
 
 void tss_init() {
@@ -15,16 +15,16 @@ void tss_init() {
   tss.io_bitmap[IO_BITMAP_BYTES] = ~0;
   tss.rsp0 = current->kstack;
 
-  struct tss_desc* desc = (struct tss_desc*)&gdt[GDT_TSS_ENTRY];
-  memset(desc, 0, sizeof(struct tss_desc));
-  desc->limit0 = sizeof(tss) & 0xffff;
-  desc->base0 = (unsigned long)(&tss) & 0xffff;
-  desc->base1 = ((unsigned long)(&tss) >> 16) & 0xff;
-  desc->type = 0x9;
-  desc->p = 1;
-  desc->limit1 = (sizeof(tss) >> 16) & 0xf;
-  desc->base2 = ((unsigned long)(&tss) >> 24) & 0xff;
-  desc->base3 = (unsigned long)(&tss) >> 32;
+  struct dtr GDTR __attribute__((aligned(16))) = {
+    .base = (uintptr_t)GDT,
+    .limit = sizeof(GDT) - 1,
+  };
+  __asm__("lgdt %0" : : "m" (GDTR));
+
+  uintptr_t base = (uintptr_t)&tss;
+  struct segment tssd = TASKSEG(base, sizeof(tss));
+  GDT[GDT_TSS_ENTRY] = tssd;
+  *(uint64_t *)(GDT+GDT_TSS_ENTRY+1) = (base>>32);
 
   // just for test
   //memset(tss.io_bitmap, 0xff, IO_BITMAP_BYTES);
