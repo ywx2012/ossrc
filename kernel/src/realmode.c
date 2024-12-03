@@ -3,7 +3,7 @@
 #include <x86/msr.h>
 #include <setup.h>
 
-__attribute__((used,aligned(1)))
+__attribute__((used,noreturn,aligned(1)))
 static
 void
 start(struct e820map *map, struct dtr *gdtr, uint32_t pml4) {
@@ -32,6 +32,6 @@ start(struct e820map *map, struct dtr *gdtr, uint32_t pml4) {
   __asm__("movl %0, %%cr3" : : "r"(pml4));
   wrmsr(MSR_EFER, MSR_EFER_SCE|MSR_EFER_LME);
   __asm__("movl %0, %%cr0" : : "r"(X86_CR0_PE|X86_CR0_PG));
-  /* __asm__("ljmpl $%c0, $%c1" : : "i"(0x08), "i"(setup_start)); */
-  /* __builtin_unreachable(); */
+  __asm__("ljmpl $%c0, $%c1" : : "i"(0x08), "i"(setup_start));
+  __builtin_unreachable();
 }

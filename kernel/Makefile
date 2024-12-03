@@ -9,7 +9,7 @@ KERNEL_CFLAGS := $(KERNEL_CFLAGS) -I$(DIR)/include -I$(DIR)/include/uapi
 KERNEL_LDFLAGS := -nostdlib -T$(DIR)/linker.ld
 
 $(BUILDDIR)/kernel.bin: $(DIR)/linker.ld $($(DIR)_OBJS) | makedirs
-	$(V)ld $(KERNEL_LDFLAGS) -o $@ $(filter $(BUILDDIR)/%,$^)
+	$(V)ld -verbose $(KERNEL_LDFLAGS) -o $@ $(filter $(BUILDDIR)/%,$^)
 
 $(BUILDDIR)/$(DIR)/%.o: $(DIR)/src/%.S | makedirs
 	$(V)gcc $(KERNEL_CFLAGS) -mcmodel=large -D__ASSEMBLY__ -c -o $@ $^

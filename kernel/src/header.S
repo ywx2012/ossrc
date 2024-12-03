@@ -93,8 +93,6 @@ _start:
         .long   0
         // kernel_info_offset
         .long   0
-exit:
-        ljmpl   $0x08,  $setup_start
 start:
         cli
         // disable NMI
@@ -105,17 +103,7 @@ start:
         pushl   $PA_FROM_VA(pml4)
         pushl   $(GDTR-base)
         pushl   $(e820map-base)
-
-        // workaround ld: final link failed
-        call    1f
-1:
-        xor     %eax, %eax
-        pop     %ax
-        subl    $(1b-exit), %eax
-        pushl   %eax
-
-next:
-        nop
+        pushl   $0
 
         .data
         .align  0x1000
