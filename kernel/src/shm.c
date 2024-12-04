@@ -1,14 +1,14 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-#include <task.h>
-#include <list.h>
 #include <frame.h>
 #include <paging.h>
+#include <task.h>
+#include <bsp.h>
+#include <uapi/shm.h>
 
 struct shm {
   char* name;
@@ -23,12 +23,12 @@ shm_init(void) {
   list_init(&shm_list);
 }
 
-int do_shm(char* name) {
+int
+shm_map(char const* name, uintptr_t va) {
   struct shm* shm = NULL;
-  unsigned long va = 0x4000000;
 
   FOREACH(node, shm_list) {
-    struct shm * s=STRUCT_FROM_FIELD(struct shm, shm_node, node);
+    struct shm *s = STRUCT_FROM_FIELD(struct shm, shm_node, node);
     if (!strcmp(s->name, name)) {
       shm = s;
       break;
@@ -47,5 +47,5 @@ int do_shm(char* name) {
 
   paging_map_page(current->pml4, va, shm->page, PTE_W|PTE_U);
 
-  return va;
+  return 0;
 }

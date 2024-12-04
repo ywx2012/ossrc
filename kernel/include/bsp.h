@@ -35,6 +35,8 @@ void task_init(void);
 void fault_init(void);
 void irq_init(void);
 void timer_init(void);
+void shm_init(void);
+void atkbd_init(void);
 void fb_init(void);
 void idt_init(void);
 

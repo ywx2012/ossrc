@@ -1,11 +1,11 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include <sys/io.h>
 #include <stdint.h>
-#include <print.h>
+#include <sys/io.h>
 #include <x86/pic.h>
 #include <irq.h>
+#include <uapi/print.h>
 
 // scancode set 2
 unsigned char keymap[256] = {

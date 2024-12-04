@@ -1,6 +1,6 @@
 #include <sys/io.h>
 #include <pci.h>
-#include <fb.h>
+#include <uapi/fb.h>
 #include <bsp.h>
 #include <paging.h>
 #include <task.h>
@@ -37,19 +37,18 @@ fb_init(void) {
   fb_base = pci_readl(addr, PCI_BASE_ADDRESS_0) & 0xFFFFFFF0;
 }
 
-unsigned long
-do_get_fb_info(struct fb_info *fb_info) {
+int
+fb_get_info(struct fb_info *fb_info) {
   fb_info->xres = FB_XRES;
   fb_info->yres = FB_YRES;
   return 0;
 }
 
-unsigned long
-do_fbmap() {
-  unsigned long va = 0xe000000;
-  unsigned long pa = fb_base;
-  unsigned long size = FB_XRES * FB_YRES * 4;
-  for(unsigned long offset = 0; offset<size; offset+=PAGE_SIZE)
+int
+fb_map(uintptr_t va) {
+  uintptr_t pa = fb_base;
+  size_t size = FB_XRES * FB_YRES * 4;
+  for(size_t offset = 0; offset<size; offset+=PAGE_SIZE)
     paging_map_addr(current->pml4, va+offset, pa+offset, PTE_W|PTE_U);
-  return va;
+  return 0;
 }

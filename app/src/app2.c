@@ -1,9 +1,10 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include <stdint.h>
 #include <print.h>
-#include <std.h>
+#include <shm.h>
+#include <fb.h>
+#include <timer.h>
 #include <draw.h>
 
 void draw_char(uint64_t fbaddr, struct fb_info* fb_info, int color) {
@@ -29,12 +30,15 @@ void draw_char(uint64_t fbaddr, struct fb_info* fb_info, int color) {
 }
 
 int main() {
-  void* m = shm_open("shm-1");
+  uintptr_t va = 0x4000000;
+  shm_map("shm-1", va);
+  char *m= (char *)va;
 
   struct fb_info fb_info;
-  get_fb_info(&fb_info);
+  fb_get_info(&fb_info);
 
-  unsigned long fbbase = fbmap();
+  uintptr_t fbbase = 0xe000000;
+  fb_map(fbbase);
   draw_char(fbbase, &fb_info, RED | GREEN);
 
   unsigned long i = 0;
@@ -45,6 +49,6 @@ int main() {
       draw_char(fbbase, &fb_info, RED | BLUE);
     }
     print(*(char*)m);
-    sleep(1000);
+    timer_sleep(1000);
   }
 }

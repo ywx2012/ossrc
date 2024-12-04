@@ -5,7 +5,7 @@ USER_CFLAGS := $(USER_CFLAGS) -I$(DIR)/include/uapi
 $(DIR)_TARGETS := $(BUILDDIR)/kernel.bin
 TARGETS := $(TARGETS) $($(DIR)_TARGETS)
 
-KERNEL_CFLAGS := $(KERNEL_CFLAGS) -I$(DIR)/include -I$(DIR)/include/uapi
+KERNEL_CFLAGS := $(KERNEL_CFLAGS) -I$(DIR)/include
 KERNEL_LDFLAGS := -nostdlib -T$(DIR)/linker.ld
 
 $(BUILDDIR)/kernel.bin: $(DIR)/linker.ld $($(DIR)_OBJS) | makedirs

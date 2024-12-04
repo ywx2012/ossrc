@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <x86/msr.h>
 #include <x86/segment.h>
 #include <task.h>
 #include <bsp.h>
@@ -9,6 +10,7 @@
 
 #define RIP 1
 #define RSP 2
+#define RFLAGS_IF 0x200
 
 struct segment gdt[GDT_SIZE] = {
   [KERNEL_CS_INDEX]=CODESEG(0),
@@ -40,10 +42,27 @@ __attribute__((naked,noreturn))
 static
 void
 user_start(void) {
-  __asm__("mov $0x200, %%r11\n"
+  __asm__("mov %c0, %%r11\n"
           "mov $0x8000000, %%rsp\n"
           "sysretq"
-          : : "c"(USER_START));
+          : : "i"(RFLAGS_IF), "c"(USER_START));
+}
+
+
+__attribute__((naked))
+static
+void
+syscall_handler(void) {
+  __asm__("movq %rsp, %r10\n"
+          "movq (tss+4)(%rip), %rsp\n"
+          "pushq %r10\n"
+          "pushq %rcx\n"
+          "pushq %r11\n"
+          "call system_call\n"
+          "popq %r11\n"
+          "popq %rcx\n"
+          "popq %rsp\n"
+          "sysretq");
 }
 
 __attribute__((naked,noreturn))
@@ -63,13 +82,18 @@ task_init(void) {
   *(uint64_t *)(gdt+TSS_INDEX+1) = (base>>32);
   __asm__ ("ltr %w0" : : "r"(TSS));
 
+  uint64_t star_val = ((uint64_t)USER_CS32) << 48  | ((uint64_t)KERNEL_CS) << 32;
+  wrmsr(MSR_STAR, star_val);
+  wrmsr(MSR_LSTAR, (uintptr_t)syscall_handler);
+  wrmsr(MSR_SFMASK, RFLAGS_IF);
+
   uintptr_t rsp0 = ((uintptr_t)frame_alloc()) + PAGE_SIZE;
   uintptr_t *page_table = paging_alloc_table();
 
   idle.id = next_id++;
   idle.pml4 = page_table;
   idle.rsp0 = rsp0;
-  idle.jmp_buf[RSP] = rsp0 - 8;
+  idle.jmp_buf[RSP] = rsp0;
   idle.jmp_buf[RIP] = (uintptr_t)idle_start;
   list_init(&idle.task_node);
   current = &idle;
@@ -93,7 +117,7 @@ task_create(size_t size, char const *data) {
   task->id = id;
   task->pml4 = page_table;
   task->rsp0 = rsp0;
-  task->jmp_buf[RSP] = rsp0 - 8;
+  task->jmp_buf[RSP] = rsp0;
   task->jmp_buf[RIP] = (uintptr_t)user_start;
   task_enqueue(task);
   return id;
@@ -112,10 +136,8 @@ task_enqueue(struct task *task) {
 
 void
 task_yield() {
-  if (__builtin_setjmp(current->jmp_buf))
-    return;
-
-  task_resume();
+  if (!__builtin_setjmp(current->jmp_buf))
+    task_switch();
 }
 
 static
@@ -127,12 +149,11 @@ resume(uintptr_t pa) {
 }
 
 void
-task_resume() {
+task_switch() {
   struct node *node = current->task_node.next;
   if (node == &idle.task_node)
     node = node->next;
   struct task *next = STRUCT_FROM_FIELD(struct task, task_node, node);
-
   tss.rsp[0] = next->rsp0;
   current = next;
   uintptr_t pa = pa_from_va((uintptr_t)current->pml4);

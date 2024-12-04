@@ -18,7 +18,7 @@ uintptr_t task_create(size_t size, char const *data);
 struct task *task_dequeue();
 void task_enqueue(struct task *);
 void task_yield();
-void task_resume();
+void task_switch();
 
 extern struct task *current;
 extern struct task idle;

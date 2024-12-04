@@ -4,8 +4,6 @@
 char bsp_stack[BSP_STACK_SIZE] __attribute__((aligned(PAGE_SIZE)));
 uintptr_t va_offset;
 
-int main();
-
 uintptr_t
 va_from_pa(uintptr_t pa) {
   return pa+va_offset;
@@ -30,13 +28,12 @@ bsp_start(void) {
   fault_init();
   irq_init();
   timer_init();
-
-  main();
-
+  shm_init();
+  atkbd_init();
   fb_init();
   idt_init();
 
   spawn_task("app1.bin");
   spawn_task("app2.bin");
-  task_resume();
+  task_switch();
 }

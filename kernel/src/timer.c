@@ -1,3 +1,4 @@
+#include <uapi/timer.h>
 #include <bsp.h>
 #include <task.h>
 #include <x86/pic.h>
@@ -37,7 +38,8 @@ timer_init(void) {
   pic_enable(IRQ_PIT0);
 }
 
-int do_sleep(long ms) {
+int
+timer_sleep(uintptr_t ms) {
   struct task *task = task_dequeue();
   task->wakeup = ticks + ms / (1000/HZ);
   list_insert(&idle.timer_node, &task->timer_node);

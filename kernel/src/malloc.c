@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <frame.h>
 #include <x86/page.h>
-#include <print.h>
 
 struct bucket_desc {
   void* freeptr;
