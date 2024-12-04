@@ -11,9 +11,8 @@ endif
 BUILDDIR ?= build
 SUBDIRS := $(wildcard */Makefile)
 TARGETS := $(BUILDDIR)/initrd.bin
-CFLAGS := -fcf-protection=none -mgeneral-regs-only -fno-pic -fno-stack-protector -ffreestanding -std=c11
-USER_CFLAGS := $(CFLAGS)
-KERNEL_CFLAGS := $(CFLAGS) -mno-red-zone -mlarge-data-threshold=2097152
+CFLAGS := -mgeneral-regs-only -fno-stack-protector -ffreestanding -std=c11
+KERNEL_CFLAGS = $(CFLAGS) -fno-pie -fcf-protection=none -mno-red-zone
 
 -include $(SUBDIRS)
 
