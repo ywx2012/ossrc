@@ -7,7 +7,8 @@
 #include <timer.h>
 #include <draw.h>
 
-void draw_char(uint64_t fbaddr, struct fb_info* fb_info, int color) {
+static
+void draw_char(uint64_t fbaddr, struct fb_info* fb_info, uint32_t color) {
   // H
   draw_en(10, 2, 0, color, fbaddr, fb_info);
   // e
@@ -29,7 +30,8 @@ void draw_char(uint64_t fbaddr, struct fb_info* fb_info, int color) {
   draw_en(110, 2, 5, color, fbaddr, fb_info);
 }
 
-int main() {
+int
+main(void) {
   uintptr_t va = 0x4000000;
   shm_map("shm-1", va);
   char *m= (char *)va;
@@ -48,7 +50,9 @@ int main() {
     } else {
       draw_char(fbbase, &fb_info, RED | BLUE);
     }
-    print(*(char*)m);
+    print(*m);
     timer_sleep(1000);
   }
+
+  return 0;
 }

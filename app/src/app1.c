@@ -7,7 +7,8 @@
 #include <fb.h>
 #include <draw.h>
 
-int main() {
+int
+main(void) {
   uintptr_t va = 0x4000000;
   shm_map("shm-1", va);
   char *m= (char *)va;

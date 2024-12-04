@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+extern const uint8_t fonts_zh[2][32];
+extern const uint8_t fonts_en[6][16];
+
 const uint8_t fonts_zh[2][32] = {
   {
     // 中
