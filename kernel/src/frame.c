@@ -7,7 +7,7 @@ struct frame {
   struct node node;
 };
 
-struct node frame_list;
+static struct node frame_list;
 
 static
 uintptr_t
@@ -31,7 +31,7 @@ frame_init(void) {
     uintptr_t end = align_down(region->end, PAGE_SIZE);
     if (end <= start)
       continue;
-    struct frame *frame = (struct frame *)va_from_pa(start);
+    struct frame *frame = (struct frame *)ptr_from_pa(start);
     frame->pages = (end-start)/PAGE_SIZE;
     list_insert(&frame_list, &(frame->node));
   }

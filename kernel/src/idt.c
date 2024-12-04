@@ -11,7 +11,7 @@ static struct dtr idtr __attribute__((aligned(16))) = {
 
 static
 void
-set_gate(uint8_t number, uint8_t type, uint8_t ist, uintptr_t offset) {
+set_gate(uint8_t number, unsigned type, unsigned ist, uintptr_t offset) {
   struct gate gate = {0};
   gate.s = 0;
   gate.size = 1;

@@ -19,16 +19,15 @@ struct segment gdt[GDT_SIZE] = {
   [USER_CS_INDEX]=CODESEG(3),
 };
 
-static
-struct dtr gdtr __attribute__((aligned(16))) = {
+static struct dtr gdtr __attribute__((aligned(16))) = {
   .base = (uintptr_t)gdt,
   .limit = sizeof(gdt) - 1,
 };
 
-struct tss tss = {
+static struct tss tss = {
   .io_base = offsetof(struct tss, iomap),
   .iomap = {
-    [sizeof(tss.iomap)-1] = ~0,
+    [sizeof(tss.iomap)-1] = 0xff,
   },
 };
 
@@ -87,7 +86,8 @@ task_init(void) {
   wrmsr(MSR_LSTAR, (uintptr_t)syscall_handler);
   wrmsr(MSR_SFMASK, RFLAGS_IF);
 
-  uintptr_t rsp0 = ((uintptr_t)frame_alloc()) + PAGE_SIZE;
+  void *stack = frame_alloc();
+  uintptr_t rsp0 = ((uintptr_t)stack) + PAGE_SIZE;
   uintptr_t *page_table = paging_alloc_table();
 
   idle.id = next_id++;
@@ -102,7 +102,8 @@ task_init(void) {
 uintptr_t
 task_create(size_t size, char const *data) {
   uintptr_t id = next_id++;
-  uintptr_t rsp0 = ((uintptr_t)frame_alloc()) + PAGE_SIZE;
+  void *stack = frame_alloc();
+  uintptr_t rsp0 = ((uintptr_t)stack) + PAGE_SIZE;
   uintptr_t *page_table = paging_alloc_table();
 
   for (size_t offset=0; offset<size; offset+=PAGE_SIZE) {
@@ -114,6 +115,8 @@ task_create(size_t size, char const *data) {
   }
 
   struct task* task = malloc(sizeof(struct task));
+  if (!task)
+    return (uintptr_t)-1;
   task->id = id;
   task->pml4 = page_table;
   task->rsp0 = rsp0;

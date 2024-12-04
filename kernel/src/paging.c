@@ -21,8 +21,7 @@ paging_map_addr(uintptr_t *entry, uintptr_t va, uintptr_t pa, uintptr_t attrs) {
       void *page = frame_alloc();
       *entry = PTE_ADDRESS(pa_from_va((uintptr_t)page))|PTE_P|a;
     }
-    uintptr_t entry_va = va_from_pa(PTE_ADDRESS(*entry));
-    entry = (uintptr_t *)entry_va;
+    entry = (uintptr_t *)ptr_from_pa(PTE_ADDRESS(*entry));
   }
 
   uint16_t index = (va >> 12) & 0x1FF;

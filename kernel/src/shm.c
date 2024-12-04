@@ -16,7 +16,7 @@ struct shm {
   struct node shm_node;
 };
 
-struct node shm_list;
+static struct node shm_list;
 
 void
 shm_init(void) {
@@ -37,8 +37,15 @@ shm_map(char const* name, uintptr_t va) {
 
   if (!shm) {
     shm = malloc(sizeof(struct shm));
-    int len = strlen(name);
+    if (!shm)
+      return -1;
+
+    size_t len = strlen(name);
     shm->name = malloc(len + 1);
+    if (!(shm->name)) {
+      free(shm);
+      return -1;
+    }
     memcpy(shm->name, name, len);
     shm->name[len] = '\0';  
     shm->page = frame_alloc();

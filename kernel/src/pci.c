@@ -7,10 +7,11 @@
 
 uint32_t
 pci_readl(uint16_t addr, uint8_t offset) {
-  outl((0x80<<24)|(addr<<8)|(offset&0xFC), CONFIG_ADDR_PORT);
+  outl((0x80U<<24)|((uint32_t)(addr<<8))|(offset & 0xFC), CONFIG_ADDR_PORT);
   return inl(CONFIG_DATA_PORT);
 }
 
+static
 uint16_t
 pci_bus_find_device(uint8_t bus, uint16_t vendor_id, uint16_t device_id, uint16_t subvendor, uint16_t subdev) {
   for (uint8_t slot=0; slot<32; ++slot) {
@@ -26,6 +27,8 @@ pci_bus_find_device(uint8_t bus, uint16_t vendor_id, uint16_t device_id, uint16_
       uint8_t header_type = pci_readb(addr, PCI_HEADER_TYPE) & 0x7F;
       if (header_type == 1) {
         uint8_t subbus = pci_readb(addr, PCI_SECONDARY_BUS);
+        if (subbus == bus)
+          continue;
         addr = pci_bus_find_device(subbus, vendor_id, device_id, subvendor, subdev);
         if (addr != 0)
           return addr;
@@ -46,6 +49,7 @@ pci_bus_find_device(uint8_t bus, uint16_t vendor_id, uint16_t device_id, uint16_
       return addr;
     }
   }
+  return 0;
 }
 
 uint16_t

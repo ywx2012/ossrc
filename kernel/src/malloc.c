@@ -1,23 +1,24 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include <stddef.h>
 #include <stdint.h>
+#include <stddef.h>
+#include <stdlib.h>
 #include <x86/page.h>
 #include <kernel/frame.h>
 
 struct bucket_desc {
   void* freeptr;
   struct bucket_desc* next; 
-  short refcnt; 
+  size_t refcnt; 
 };
 
 struct bucket_dir {
-  uint16_t size;
+  size_t size;
   struct bucket_desc* bdesc;
 };
 
-struct bucket_dir bucket_dir[] = {
+static struct bucket_dir bucket_dir[] = {
   { 16, NULL }, 
   { 32, NULL },
   { 64, NULL },
@@ -29,7 +30,7 @@ struct bucket_dir bucket_dir[] = {
   { 0, NULL }
 };
 
-void* malloc(int size) {
+void* malloc(size_t size) {
   void* va = NULL;
   struct bucket_dir* bdir = NULL;
   struct bucket_desc* bdesc = NULL;
@@ -57,7 +58,7 @@ void* malloc(int size) {
     bdesc->refcnt = 0;
 
     unsigned long* p = bdesc->freeptr;
-    int i = 0;
+    size_t i = 0;
     while (++i < ((PAGE_SIZE - sizeof(struct bucket_desc)) / bdir->size)) {
       *p = (unsigned long)p + bdir->size;
       p = (unsigned long*)((unsigned long)p + bdir->size);

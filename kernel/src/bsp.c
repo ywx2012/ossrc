@@ -4,9 +4,9 @@
 char bsp_stack[BSP_STACK_SIZE] __attribute__((aligned(PAGE_SIZE)));
 uintptr_t va_offset;
 
-uintptr_t
-va_from_pa(uintptr_t pa) {
-  return pa+va_offset;
+void *
+ptr_from_pa(uintptr_t pa) {
+  return (void *)(pa+va_offset);
 }
 
 uintptr_t

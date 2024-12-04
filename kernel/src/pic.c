@@ -62,7 +62,7 @@ pic_init(unsigned char offset1, unsigned char offset2) {
 
 void
 pic_enable(unsigned char irq) {
-  unsigned port = (irq<8)?IOPORT_PIC0:IOPORT_PIC1;
+  unsigned char port = (irq<8)?IOPORT_PIC0:IOPORT_PIC1;
   unsigned char mask = pic_get_mask(port);
   mask ^= mask & (unsigned char)(1 << (irq % 8));
   pic_set_mask(mask, port);
@@ -70,7 +70,7 @@ pic_enable(unsigned char irq) {
 
 void
 pic_disable(unsigned char irq) {
-  unsigned port = (irq<8)?IOPORT_PIC0:IOPORT_PIC1;
+  unsigned char port = (irq<8)?IOPORT_PIC0:IOPORT_PIC1;
   unsigned char mask = pic_get_mask(port);
   mask |= (unsigned char)(1 << (irq % 8));
   pic_set_mask(mask, port);
@@ -78,7 +78,7 @@ pic_disable(unsigned char irq) {
 
 bool
 pic_acknowledge(unsigned char irq) {
-  unsigned port = (irq<8)?IOPORT_PIC0:IOPORT_PIC1;
+  unsigned char port = (irq<8)?IOPORT_PIC0:IOPORT_PIC1;
   unsigned char isr = pic_get_isr(port);
   unsigned char mask = (unsigned char)(1 << (irq % 8));
   bool is_servicing = (isr&mask)?true:false;

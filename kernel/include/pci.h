@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <linux/pci.h>
 
-#define PCI_ADDR(bus,slot,func) (((bus)<<8)|PCI_DEVFN((slot),(func)))
+#define PCI_ADDR(bus,slot,func) (((uint16_t)((bus)<<8))|(PCI_DEVFN((slot),(func))))
 #define pci_readw(addr,offset) ((pci_readl((addr),(offset))>>(8*((offset)&2)))&0xFFFF)
 #define pci_readb(addr,offset) ((pci_readl((addr),(offset))>>(8*((offset)&3)))&0xFF)
 uint32_t pci_readl(uint16_t addr, uint8_t offset);

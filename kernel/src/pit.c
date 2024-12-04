@@ -16,8 +16,8 @@ pit_set_mode(unsigned char channel, unsigned char mode) {
 
 void
 pit_set_count(unsigned char channel, unsigned short count) {
-  unsigned char lo = count & 0xFF;
-  unsigned char hi = (count >> 8) & 0xFF;
+  unsigned char lo = count & 0xFFU;
+  unsigned char hi = (count >> 8) & 0xFFU;
   outb(lo, ioport[channel]);
   outb(hi, ioport[channel]);
 }

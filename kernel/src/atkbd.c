@@ -4,11 +4,13 @@
 #include <stdint.h>
 #include <sys/io.h>
 #include <x86/pic.h>
-#include <kernel/irq.h>
 #include <user/print.h>
+#include <kernel/irq.h>
+#include <kernel/bsp.h>
+
 
 // scancode set 2
-unsigned char keymap[256] = {
+static unsigned char keymap[256] = {
   [0x1c] = 'a',
   [0x32] = 'b',
   [0x21] = 'c',
@@ -47,7 +49,9 @@ unsigned char keymap[256] = {
   [0x46] = '9'
 };
 
-void process_kb() {
+static
+void
+process_kb(void) {
   static unsigned char prevcode;
   unsigned char scancode = inb(0x60);
 	
@@ -67,7 +71,7 @@ void process_kb() {
 __attribute__((interrupt))
 static
 void
-kb_handler(struct interrupt_frame *frame) {
+kb_handler(struct interrupt_frame *frame __attribute__((unused))) {
   if (!pic_acknowledge(IRQ_KBD))
     return;
   process_kb();
@@ -85,7 +89,8 @@ kb_handler(struct interrupt_frame *frame) {
 
 #define SET_SCANCODESET 0xF0
 
-void atkbd_init() {
+void
+atkbd_init(void) {
   outb(DISABLE_PORT1, CMD_REG);
   outb(DISABLE_PORT2, CMD_REG);
 
@@ -95,7 +100,7 @@ void atkbd_init() {
   outb(READ_BYTE+0, CMD_REG);
   unsigned char c = inb(DATA_REG);
   outb(WRITE_BYTE+0, CMD_REG);
-  outb(c^(c&TRANSLATION_FLAG),  DATA_REG);
+  outb((unsigned char)(c^(c&TRANSLATION_FLAG)),  DATA_REG);
 
   outb(SET_SCANCODESET, DATA_REG);
   outb(0x02, DATA_REG);

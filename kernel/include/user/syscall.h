@@ -16,4 +16,5 @@ syscall(uintptr_t number, uintptr_t arg1, uintptr_t arg2) {
           : "=a"(result)
           : "D"(arg1), "S"(arg2), "d"(number)
           : "rcx", "r8", "r9", "r10", "r11", "memory");
+  return result;
 }

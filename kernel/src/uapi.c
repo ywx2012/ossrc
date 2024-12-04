@@ -2,6 +2,7 @@
 #include <user/timer.h>
 #include <user/fb.h>
 #include <user/shm.h>
+#include <kernel/task.h>
 
 int
 system_call(uintptr_t rdi, uintptr_t rsi, uintptr_t rdx) {

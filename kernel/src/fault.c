@@ -6,7 +6,7 @@
 __attribute__((interrupt))
 static
 void
-pf_handler(struct interrupt_frame *frame, uintptr_t error_code) {
+pf_handler(struct interrupt_frame *frame __attribute__((unused)), uintptr_t error_code __attribute__((unused))) {
   uintptr_t addr;
   __asm__("mov %%cr2, %0" : "=r"(addr));
   paging_alloc_page(current->pml4, addr, PTE_W|PTE_U);

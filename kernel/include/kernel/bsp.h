@@ -41,5 +41,5 @@ void fb_init(void);
 void idt_init(void);
 
 void bsp_start(void);
-uintptr_t va_from_pa(uintptr_t pa);
+void *ptr_from_pa(uintptr_t pa);
 uintptr_t pa_from_va(uintptr_t va);

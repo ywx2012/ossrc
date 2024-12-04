@@ -12,7 +12,7 @@ static size_t ticks = 0;
 __attribute__((interrupt))
 static
 void
-timer_handler(struct interrupt_frame *frame) {
+timer_handler(struct interrupt_frame *frame __attribute__((unused))) {
   if (!pic_acknowledge(IRQ_PIT0))
     return;
 
