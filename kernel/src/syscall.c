@@ -4,10 +4,9 @@
 #include <syscall.h>
 #include <x86/msr.h>
 #include <stdint.h>
-#include <segment.h>
+#include <selector.h>
 #include <sched.h>
 #include <vesa.h>
-#include <tss.h>
 
 #define RF_IF 0x00000200
 
@@ -40,7 +39,7 @@ system_call() {
 }
 
 void syscall_init() {
-  uint64_t star_val = ((uint64_t)USER32_CS) << 48  | ((uint64_t)KERNEL_CS) << 32;
+  uint64_t star_val = ((uint64_t)USER_CS32) << 48  | ((uint64_t)KERNEL_CS) << 32;
   wrmsr(MSR_STAR, star_val);
   wrmsr(MSR_LSTAR, (uint64_t)system_call);
   wrmsr(MSR_SFMASK, RF_IF);

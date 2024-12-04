@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#define N_IOPORTS (1<<16)
+
 struct segment {
   uint64_t limit_l: 16;
   uint64_t base_l: 16;
@@ -21,6 +23,16 @@ struct segment {
 struct dtr {
   uint16_t limit;
   uint64_t base;
+} __attribute__((packed));
+
+struct tss {
+  uintptr_t reserved_0: 32;
+  uintptr_t rsp[3];
+  uintptr_t ist[8];
+  uintptr_t reserved_1;
+  uintptr_t reserved_2: 16;
+  uintptr_t io_base: 16;
+  uint8_t iomap[N_IOPORTS/sizeof(uint8_t)+1];
 } __attribute__((packed));
 
 #define SEGMENT(base,limit,s,type,dpl,g) \

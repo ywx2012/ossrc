@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-#include <sched.h>
+#include <task.h>
 #include <list.h>
 #include <frame.h>
 #include <paging.h>

@@ -5,7 +5,7 @@
 #include <sys/io.h>
 #include <string.h>
 #include <interrupt.h>
-#include <segment.h>
+#include <selector.h>
 #include <x86/pic.h>
 #include <x86/segment.h>
 
@@ -56,6 +56,5 @@ void interrupt_init() {
   __asm__("lidt %0" : : "m"(IDTR));
 
   pic_init(IRQ_OFFSET, IRQ_OFFSET+0x8);
-  pic_enable(IRQ_PIT0);
   pic_enable(IRQ_KBD);
 }

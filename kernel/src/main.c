@@ -3,8 +3,6 @@
 
 #include <print.h>
 #include <sched.h>
-#include <tss.h>
-#include <segment.h>
 #include <interrupt.h>
 #include <syscall.h>
 #include <shm.h>
@@ -18,9 +16,5 @@ int main() {
   vesa_init();
   atkbd_init();
 
-  sched_init();
-  tss_init();
   init_8254();
-
-  resume_task();
 }

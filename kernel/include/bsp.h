@@ -11,7 +11,7 @@
 extern char bsp_stack[BSP_STACK_SIZE];
 
 #define GDT_SIZE 10
-extern struct segment GDT[GDT_SIZE];
+extern struct segment gdt[GDT_SIZE];
 
 struct region {
   uintptr_t start;
@@ -32,6 +32,8 @@ extern struct node region_list;
 extern uintptr_t pml4[PAGE_SIZE/sizeof(uintptr_t)];
 
 void frame_init(void);
+void task_init(void);
+void timer_init(void);
 
 void bsp_start(void);
 uintptr_t va_from_pa(uintptr_t pa);

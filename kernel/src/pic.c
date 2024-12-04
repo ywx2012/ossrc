@@ -17,21 +17,18 @@
 #define IOPORT_PIC1 0xA0
 
 static
-inline
 unsigned char
 pic_get_mask(unsigned char port) {
   return inb(port|A0);
 }
 
 static
-inline
 void
 pic_set_mask(unsigned char mask, unsigned char port) {
   outb(mask, port|A0);
 }
 
 static
-inline
 unsigned char
 pic_get_isr(unsigned char port) {
   outb(OCW3|OCW3_RR|OCW3_RIS, port);
@@ -39,9 +36,8 @@ pic_get_isr(unsigned char port) {
 }
 
 static
-inline
 void
-pic_eoi(unsigned char port, unsigned char irq) {
+pic_eoi(unsigned char irq, unsigned char port) {
   outb(OCW2|OCW2_SL|OCW2_EOI|irq, port);
 }
 
@@ -81,20 +77,15 @@ pic_disable(unsigned char irq) {
 }
 
 bool
-pic_is_spurious(unsigned char irq) {
+pic_acknowledge(unsigned char irq) {
   unsigned port = (irq<8)?IOPORT_PIC0:IOPORT_PIC1;
-  unsigned char isr = pic_get_isr(IOPORT_PIC0);
+  unsigned char isr = pic_get_isr(port);
   unsigned char mask = (unsigned char)(1 << (irq % 8));
-  if (isr & mask)
-    return false;
-  return true;
-}
+  bool is_servicing = (isr&mask)?true:false;
 
-void
-pic_acknowledge(unsigned char irq, bool is_spurious) {
-  unsigned port = (irq<8)?IOPORT_PIC0:IOPORT_PIC1;
-  if (!is_spurious)
+  if (is_servicing)
     pic_eoi(irq % 8, port);
   if (port == IOPORT_PIC1)
     pic_eoi(IRQ_PIC1, IOPORT_PIC0);
+  return is_servicing;
 }

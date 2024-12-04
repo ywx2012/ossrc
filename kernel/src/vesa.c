@@ -4,7 +4,7 @@
 #include <string.h>
 #include <vesa.h>
 #include <bochs.h>
-#include <sched.h>
+#include <task.h>
 #include <paging.h>
 
 struct mode_info vesa_mode_info;

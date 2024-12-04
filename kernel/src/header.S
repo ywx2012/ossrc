@@ -1,7 +1,8 @@
 #include <asm/boot.h>
 #include <asm/bootparam.h>
-#include <header.h>
 #include <x86/page.h>
+#include <header.h>
+#include <selector.h>
 
 #define PA_FROM_VA(x) (((x)-code32_start)+CODE32_START)
 
@@ -94,7 +95,7 @@ _start:
         // kernel_info_offset
         .long   0
 exit:
-        ljmpl   $0x08,  $setup_start
+        ljmpl   $(KERNEL_CS),   $setup_start
 start:
         cli
         // disable NMI
@@ -103,7 +104,7 @@ start:
         out     %ax,    %dx
 
         pushl   $PA_FROM_VA(pml4)
-        pushl   $(GDTR-base)
+        pushl   $(gdtr-base)
         pushl   $(e820map-base)
 
         // workaround ld: final link failed

@@ -1,14 +1,8 @@
 #include <bsp.h>
+#include <task.h>
 
 char bsp_stack[BSP_STACK_SIZE] __attribute__((aligned(PAGE_SIZE)));
 uintptr_t va_offset;
-
-struct segment GDT[GDT_SIZE] = {
-  [1]=CODESEG(0),
-  [2]=DATASEG(0),
-  [4]=DATASEG(3),
-  [5]=CODESEG(3),
-};
 
 int main();
 
@@ -22,8 +16,21 @@ pa_from_va(uintptr_t va) {
   return va-va_offset;
 }
 
+static
+void
+spawn_task(char const *filename) {
+  struct cpio_newc_header const *cpio = cpio_lookup(initrd, filename);
+  task_create(cpio_get_size(cpio), cpio_get_content(cpio));
+}
+
 void
 bsp_start(void) {
   frame_init();
+  task_init();
+  timer_init();
+  spawn_task("app1.bin");
+  spawn_task("app2.bin");
+
   main();
+  task_resume();
 }
