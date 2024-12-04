@@ -10,7 +10,6 @@
 #include <atkbd.h>
 
 int main() {
-  interrupt_init();
   syscall_init(); 
   shm_init();
   vesa_init();

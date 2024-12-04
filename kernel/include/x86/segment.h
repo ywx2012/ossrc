@@ -25,6 +25,21 @@ struct dtr {
   uint64_t base;
 } __attribute__((packed));
 
+struct gate {
+  uintptr_t offset: 16;
+  uintptr_t segment_selector: 16;
+  uintptr_t ist: 3;
+  uintptr_t zero: 5;
+  uintptr_t type: 3;
+  uintptr_t size: 1;
+  uintptr_t s: 1;
+  uintptr_t dpl: 2;
+  uintptr_t present: 1;
+  uintptr_t offset_l: 16;
+  uintptr_t offset_q: 32;
+  uintptr_t reserved: 32;
+} __attribute__((packed));
+
 struct tss {
   uintptr_t reserved_0: 32;
   uintptr_t rsp[3];
@@ -44,3 +59,6 @@ struct tss {
 #define CODESEG(dpl) SEGMENT(0,0xFFFFF,1,0x9,(dpl)&0x3,1)
 #define DATASEG(dpl) SEGMENT(0,0xFFFFF,1,0x3,(dpl)&0x3,1)
 #define TASKSEG(base,limit) SEGMENT((base),(limit),0,0x9,0,0)
+
+#define GATE_TYPE_INT  0x6
+#define GATE_TYPE_TRAP 0x7

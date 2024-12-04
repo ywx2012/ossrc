@@ -19,7 +19,6 @@ struct region {
   struct node node;
 };
 
-
 extern char const __kernel_start[];
 extern char const __kernel_end[];
 
@@ -33,7 +32,10 @@ extern uintptr_t pml4[PAGE_SIZE/sizeof(uintptr_t)];
 
 void frame_init(void);
 void task_init(void);
+void fault_init(void);
+void irq_init(void);
 void timer_init(void);
+void idt_init(void);
 
 void bsp_start(void);
 uintptr_t va_from_pa(uintptr_t pa);

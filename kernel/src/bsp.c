@@ -27,10 +27,15 @@ void
 bsp_start(void) {
   frame_init();
   task_init();
+  fault_init();
+  irq_init();
   timer_init();
-  spawn_task("app1.bin");
-  spawn_task("app2.bin");
 
   main();
+
+  idt_init();
+
+  spawn_task("app1.bin");
+  spawn_task("app2.bin");
   task_resume();
 }

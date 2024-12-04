@@ -1,17 +1,12 @@
 #include <bsp.h>
 #include <task.h>
 #include <x86/pic.h>
-#include <interrupt.h>
+#include <irq.h>
 
 static size_t ticks = 0;
 
-void
-timer_init(void) {
-  list_init(&idle.timer_node);
-  pic_enable(IRQ_PIT0);
-}
-
 __attribute__((interrupt))
+static
 void
 timer_handler(struct interrupt_frame *frame) {
   if (!pic_acknowledge(IRQ_PIT0))
@@ -28,6 +23,13 @@ timer_handler(struct interrupt_frame *frame) {
   }
 
   task_yield();
+}
+
+void
+timer_init(void) {
+  list_init(&idle.timer_node);
+  irq_set_handler(IRQ_PIT0, 0, timer_handler);
+  pic_enable(IRQ_PIT0);
 }
 
 int do_sleep(long ms) {

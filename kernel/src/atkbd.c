@@ -4,7 +4,8 @@
 #include <sys/io.h>
 #include <stdint.h>
 #include <print.h>
-#include <interrupt.h>
+#include <x86/pic.h>
+#include <irq.h>
 
 // scancode set 2
 unsigned char keymap[256] = {
@@ -64,10 +65,12 @@ void process_kb() {
 }
 
 __attribute__((interrupt))
+static
 void
 kb_handler(struct interrupt_frame *frame) {
+  if (!pic_acknowledge(IRQ_KBD))
+    return;
   process_kb();
-  outb(0x20, 0x20);
 }
 
 #define DATA_REG 0x60
@@ -98,4 +101,7 @@ void atkbd_init() {
   outb(0x02, DATA_REG);
 
   outb(ENABLE_PORT1, CMD_REG);
+
+  irq_set_handler(IRQ_KBD, 0, kb_handler);
+  pic_enable(IRQ_KBD);
 }
