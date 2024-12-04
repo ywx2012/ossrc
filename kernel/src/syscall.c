@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include <selector.h>
 #include <sched.h>
-#include <vesa.h>
 
 #define RF_IF 0x00000200
 
@@ -16,9 +15,9 @@ typedef unsigned long (*fn_ptr)();
 unsigned long do_sleep(long ms);
 unsigned long do_shm(const char* name);
 unsigned long do_fbmap();
-unsigned long do_get_mode_info(struct mode_info *mode_info);
+unsigned long do_get_fb_info(struct fb_info *fb_info);
 
-fn_ptr syscall_table[] = { do_sleep, do_shm, do_fbmap, do_get_mode_info };
+fn_ptr syscall_table[] = { do_sleep, do_shm, do_fbmap, do_get_fb_info };
 
 __attribute__((naked))
 void

@@ -33,6 +33,7 @@ bsp_start(void) {
 
   main();
 
+  fb_init();
   idt_init();
 
   spawn_task("app1.bin");

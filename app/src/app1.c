@@ -10,17 +10,17 @@ int main() {
   void* m = shm_open("shm-1");
   *(char*)m = 'S';
 
-  struct mode_info mode_info;
-  get_mode_info(&mode_info);
+  struct fb_info fb_info;
+  get_fb_info(&fb_info);
 
   unsigned long fbbase = fbmap();
 
   while (1) {
-    draw_rect(10, 100, 150, 100, RED, fbbase, &mode_info);
+    draw_rect(10, 100, 150, 100, RED, fbbase, &fb_info);
     sleep(1000);
-    draw_rect(10, 100, 150, 100, GREEN, fbbase, &mode_info);
+    draw_rect(10, 100, 150, 100, GREEN, fbbase, &fb_info);
     sleep(1000);
-    draw_rect(10, 100, 150, 100, BLUE, fbbase, &mode_info);
+    draw_rect(10, 100, 150, 100, BLUE, fbbase, &fb_info);
     sleep(1000);
   }
 }

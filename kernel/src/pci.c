@@ -5,12 +5,14 @@
 #define CONFIG_ADDR_PORT 0xCF8
 #define CONFIG_DATA_PORT 0xCFC
 
-uint32_t pci_readl(uint16_t addr, uint8_t offset) {
+uint32_t
+pci_readl(uint16_t addr, uint8_t offset) {
   outl((0x80<<24)|(addr<<8)|(offset&0xFC), CONFIG_ADDR_PORT);
   return inl(CONFIG_DATA_PORT);
 }
 
-uint16_t pci_bus_find_device(uint8_t bus, uint16_t vendor_id, uint16_t device_id, uint16_t subvendor, uint16_t subdev) {
+uint16_t
+pci_bus_find_device(uint8_t bus, uint16_t vendor_id, uint16_t device_id, uint16_t subvendor, uint16_t subdev) {
   for (uint8_t slot=0; slot<32; ++slot) {
     if (pci_readw(PCI_ADDR(bus, slot, 0), PCI_VENDOR_ID)==0xFFFF)
       continue;
@@ -46,6 +48,7 @@ uint16_t pci_bus_find_device(uint8_t bus, uint16_t vendor_id, uint16_t device_id
   }
 }
 
-uint16_t pci_find_device(uint16_t vendor_id, uint16_t device_id, uint16_t subvendor, uint16_t subdev) {
+uint16_t
+pci_find_device(uint16_t vendor_id, uint16_t device_id, uint16_t subvendor, uint16_t subdev) {
   return pci_bus_find_device(0, vendor_id, device_id, subvendor, subdev);
 }

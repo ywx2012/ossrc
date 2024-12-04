@@ -4,12 +4,12 @@
 #define SYSCALL_SLEEP       0
 #define SYSCALL_SHM         1
 #define SYSCALL_FBMAP       2
-#define SYSCALL_GETMODEINFO 3
+#define SYSCALL_GETFBINFO   3
 
 .globl sleep
 .globl shm_open
 .globl fbmap
-.globl get_mode_info
+.globl get_fb_info
 
 sleep:
   mov $SYSCALL_SLEEP, %rax
@@ -26,7 +26,7 @@ fbmap:
   syscall
   ret
 
-get_mode_info:
-  mov $SYSCALL_GETMODEINFO, %rax
+get_fb_info:
+  mov $SYSCALL_GETFBINFO, %rax
   syscall
   ret
