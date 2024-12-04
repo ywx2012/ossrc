@@ -1,7 +1,7 @@
-#include <asm/processor-flags.h>
 #include <stdbool.h>
+#include <asm/processor-flags.h>
 #include <x86/msr.h>
-#include <setup.h>
+#include <setup/setup.h>
 
 __attribute__((used,aligned(1)))
 static

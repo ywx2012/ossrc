@@ -1,5 +1,5 @@
 DIR := $(lastword $(MAKEFILE_LIST:/Makefile=))
-USER_CFLAGS := $(USER_CFLAGS) -I$(DIR)/include/uapi
+USER_CFLAGS := $(USER_CFLAGS) -I$(DIR)/include/user
 
 -include common.mk
 $(DIR)_TARGETS := $(BUILDDIR)/kernel.bin

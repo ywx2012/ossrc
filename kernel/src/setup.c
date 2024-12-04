@@ -1,7 +1,7 @@
-#include <setup.h>
-#include <bsp.h>
-#include <header.h>
-#include <selector.h>
+#include <setup/setup.h>
+#include <setup/header.h>
+#include <kernel/bsp.h>
+#include <kernel/selector.h>
 
 struct e820map e820map = {0};
 

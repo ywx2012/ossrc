@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-#include <frame.h>
-#include <paging.h>
-#include <task.h>
-#include <bsp.h>
-#include <uapi/shm.h>
+#include <user/shm.h>
+#include <kernel/frame.h>
+#include <kernel/paging.h>
+#include <kernel/task.h>
+#include <kernel/bsp.h>
 
 struct shm {
   char* name;

@@ -1,7 +1,7 @@
-#include <uapi/syscall.h>
-#include <uapi/timer.h>
-#include <uapi/fb.h>
-#include <uapi/shm.h>
+#include <user/syscall.h>
+#include <user/timer.h>
+#include <user/fb.h>
+#include <user/shm.h>
 
 int
 system_call(uintptr_t rdi, uintptr_t rsi, uintptr_t rdx) {

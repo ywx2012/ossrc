@@ -1,6 +1,6 @@
 #include <x86/pic.h>
 #include <x86/idt.h>
-#include <irq.h>
+#include <kernel/irq.h>
 
 #define IRQ_OFFSET 0x20
 

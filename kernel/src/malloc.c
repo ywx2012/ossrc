@@ -3,8 +3,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <frame.h>
 #include <x86/page.h>
+#include <kernel/frame.h>
 
 struct bucket_desc {
   void* freeptr;

@@ -1,9 +1,9 @@
-#include <uapi/timer.h>
-#include <bsp.h>
-#include <task.h>
 #include <x86/pic.h>
 #include <x86/pit.h>
-#include <irq.h>
+#include <user/timer.h>
+#include <kernel/bsp.h>
+#include <kernel/task.h>
+#include <kernel/irq.h>
 
 #define HZ 100
 

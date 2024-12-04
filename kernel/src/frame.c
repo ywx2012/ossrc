@@ -1,6 +1,6 @@
 #include <string.h>
-#include <frame.h>
-#include <bsp.h>
+#include <kernel/frame.h>
+#include <kernel/bsp.h>
 
 struct frame {
   size_t pages;

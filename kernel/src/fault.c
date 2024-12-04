@@ -1,7 +1,7 @@
 #include <x86/idt.h>
-#include <task.h>
-#include <paging.h>
-#include <bsp.h>
+#include <kernel/task.h>
+#include <kernel/paging.h>
+#include <kernel/bsp.h>
 
 __attribute__((interrupt))
 static

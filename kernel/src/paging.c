@@ -1,6 +1,6 @@
-#include <paging.h>
-#include <frame.h>
-#include <bsp.h>
+#include <kernel/paging.h>
+#include <kernel/frame.h>
+#include <kernel/bsp.h>
 
 uintptr_t *
 paging_alloc_table(void) {

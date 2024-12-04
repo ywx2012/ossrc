@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <sys/io.h>
 #include <x86/pic.h>
-#include <irq.h>
-#include <uapi/print.h>
+#include <kernel/irq.h>
+#include <user/print.h>
 
 // scancode set 2
 unsigned char keymap[256] = {

@@ -2,11 +2,11 @@
 #include <string.h>
 #include <x86/msr.h>
 #include <x86/segment.h>
-#include <task.h>
-#include <bsp.h>
-#include <selector.h>
-#include <paging.h>
-#include <frame.h>
+#include <kernel/task.h>
+#include <kernel/bsp.h>
+#include <kernel/selector.h>
+#include <kernel/paging.h>
+#include <kernel/frame.h>
 
 #define RIP 1
 #define RSP 2

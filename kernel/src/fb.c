@@ -1,9 +1,9 @@
 #include <sys/io.h>
 #include <pci.h>
-#include <uapi/fb.h>
-#include <bsp.h>
-#include <paging.h>
-#include <task.h>
+#include <user/fb.h>
+#include <kernel/bsp.h>
+#include <kernel/paging.h>
+#include <kernel/task.h>
 
 #define VBE_INDEX_PORT 0x01ce
 #define VBE_DATA_PORT 0x01cf

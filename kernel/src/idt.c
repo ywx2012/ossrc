@@ -1,7 +1,7 @@
 #include <x86/segment.h>
 #include <x86/idt.h>
-#include <bsp.h>
-#include <selector.h>
+#include <kernel/bsp.h>
+#include <kernel/selector.h>
 
 static struct gate idt[256] __attribute__((aligned(PAGE_SIZE))) = {0};
 static struct dtr idtr __attribute__((aligned(16))) = {

@@ -1,8 +1,8 @@
 #include <asm/boot.h>
 #include <asm/bootparam.h>
 #include <x86/page.h>
-#include <header.h>
-#include <selector.h>
+#include <setup/header.h>
+#include <kernel/selector.h>
 
 #define PA_FROM_VA(x) (((x)-code32_start)+CODE32_START)
 
