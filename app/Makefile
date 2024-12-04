@@ -8,7 +8,7 @@ $(BUILDDIR)/$(DIR)/%.bin: $(BUILDDIR)/$(DIR)/%.o | makedirs libs
 	$(V)ld $(USER_LDFLAGS) -o $@ $^ $(LIBS)
 
 $(BUILDDIR)/$(DIR)/%.o: $(DIR)/src/%.c | makedirs
-	$(V)gcc $(USER_CFLAGS) -c -o $@ $^
+	$(V)gcc $(USER_CFLAGS) -c -o $@ $<
 
 $(BUILDDIR)/$(DIR)/%.d: $(DIR)/src/%.c | makedirs
-	$(V)gcc -MM $(USER_CFLAGS) -c -o $@ $^
+	$(V)gcc -MM -MT ${@:%.d=%.o} $(USER_CFLAGS) -c -o $@ $<
