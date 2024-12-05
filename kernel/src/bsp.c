@@ -1,5 +1,6 @@
 #include <kernel/bsp.h>
 #include <kernel/task.h>
+#include <kernel/frame.h>
 
 char bsp_stack[BSP_STACK_SIZE] __attribute__((aligned(PAGE_SIZE)));
 uintptr_t va_offset;
@@ -35,5 +36,8 @@ bsp_start(void) {
 
   spawn_task("app1.bin");
   spawn_task("app2.bin");
+
+  frame_reclaim((uintptr_t)initrd, (uintptr_t)initrd + initrd_size);
+  frame_reclaim((uintptr_t)__setup_start, (uintptr_t)__setup_end);
   task_switch();
 }

@@ -21,6 +21,8 @@ struct region {
 
 extern char const __kernel_start[];
 extern char const __kernel_end[];
+extern char const __setup_start[];
+extern char const __setup_end[];
 
 extern uintptr_t va_offset;
 extern struct cpio_newc_header const *initrd;

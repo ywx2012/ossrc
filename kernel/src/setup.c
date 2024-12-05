@@ -85,6 +85,7 @@ setup_main(void) {
 
   combine_consecutive_region();
   remove_region(pa_from_ptr(__kernel_start), pa_from_ptr(__kernel_end));
+  remove_region((uintptr_t)__setup_start, (uintptr_t)__setup_end);
 
   uintptr_t ramdisk_image = setup_header.ramdisk_image;
   initrd = (struct cpio_newc_header const *)ramdisk_image;

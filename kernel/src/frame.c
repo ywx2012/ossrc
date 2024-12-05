@@ -54,7 +54,16 @@ frame_alloc(void) {
 
 void
 frame_free(void *page) {
-    struct frame *frame = (struct frame *)page;
-    frame->pages = 1;
-    list_insert(&frame_list, &(frame->node));
+  struct frame *frame = (struct frame *)page;
+  frame->pages = 1;
+  list_insert(&frame_list, &(frame->node));
+}
+
+void
+frame_reclaim(uintptr_t start, uintptr_t end) {
+  start = align_down(start, PAGE_SIZE);
+  end = align_up(end, PAGE_SIZE);
+  struct frame *frame = (struct frame *)ptr_from_pa(start);
+  frame->pages = (end-start)/PAGE_SIZE;
+  list_insert(&frame_list, &(frame->node));
 }
