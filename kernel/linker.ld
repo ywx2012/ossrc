@@ -18,7 +18,7 @@ SECTIONS {
     __kernel_start = .;
     .data : AT(ADDR(.data) - __kernel_start + SIZEOF(.setup)) {
       build/kernel/header.o(.data);
-      *(.data .rodata .rodata.*);
+      *(.data .rodata .rodata.* .ldata);
       *(.bss);
     }
     .text : AT(ADDR(.text) - __kernel_start + SIZEOF(.setup)) {

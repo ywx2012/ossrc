@@ -20,7 +20,7 @@ DETECT_CFLAGS := \
 BUILDDIR ?= build
 SUBDIRS := $(wildcard */Makefile)
 TARGETS := $(BUILDDIR)/initrd.bin
-CFLAGS := -mgeneral-regs-only -fno-stack-protector -ffreestanding -std=c11 \
+CFLAGS := -mgeneral-regs-only -fno-stack-protector -fno-builtin -ffreestanding -std=c11 \
 	-Werror -Wall -Wextra \
 	-pedantic -pedantic-errors -Wno-long-long \
 	-Waggregate-return \

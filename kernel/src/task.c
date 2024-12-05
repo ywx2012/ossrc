@@ -50,16 +50,20 @@ __attribute__((naked))
 static
 void
 syscall_handler(void) {
-  __asm__("movq %rsp, %r10\n"
-          "movq (tss+4)(%rip), %rsp\n"
-          "pushq %r10\n"
-          "pushq %rcx\n"
-          "pushq %r11\n"
-          "call system_call\n"
-          "popq %r11\n"
-          "popq %rcx\n"
-          "popq %rsp\n"
-          "sysretq");
+  __asm__("movq %%rsp, %%r10\n"
+          "movq (tss+4)(%%rip), %%rsp\n"
+          "pushq %%r10\n"
+          "pushq %%rcx\n"
+          "pushq %%r11\n"
+          "movabs %0, %%r10\n"
+          "call *%%r10\n"
+          "popq %%r11\n"
+          "popq %%rcx\n"
+          "popq %%rsp\n"
+          "sysretq"
+          :
+          : "i"(system_call)
+          :"r10");
 }
 
 __attribute__((naked,noreturn))
