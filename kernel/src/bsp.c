@@ -10,8 +10,8 @@ ptr_from_pa(uintptr_t pa) {
 }
 
 uintptr_t
-pa_from_va(uintptr_t va) {
-  return va-va_offset;
+pa_from_ptr(void const *ptr) {
+  return ((uintptr_t)ptr)-va_offset;
 }
 
 static

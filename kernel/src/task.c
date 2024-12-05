@@ -159,6 +159,6 @@ task_switch() {
   struct task *next = STRUCT_FROM_FIELD(struct task, task_node, node);
   tss.rsp[0] = next->rsp0;
   current = next;
-  uintptr_t pa = pa_from_va((uintptr_t)current->pml4);
+  uintptr_t pa = pa_from_ptr(current->pml4);
   resume(pa);
 }

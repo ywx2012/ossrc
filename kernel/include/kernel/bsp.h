@@ -42,4 +42,4 @@ void idt_init(void);
 
 void bsp_start(void);
 void *ptr_from_pa(uintptr_t pa);
-uintptr_t pa_from_va(uintptr_t va);
+uintptr_t pa_from_ptr(void const *);

@@ -19,7 +19,7 @@ paging_map_addr(uintptr_t *entry, uintptr_t va, uintptr_t pa, uintptr_t attrs) {
     entry = entry + index;
     if (!((*entry) & PTE_P)) {
       void *page = frame_alloc();
-      *entry = PTE_ADDRESS(pa_from_va((uintptr_t)page))|PTE_P|a;
+      *entry = PTE_ADDRESS(pa_from_ptr(page))|PTE_P|a;
     }
     entry = (uintptr_t *)ptr_from_pa(PTE_ADDRESS(*entry));
   }
@@ -30,7 +30,7 @@ paging_map_addr(uintptr_t *entry, uintptr_t va, uintptr_t pa, uintptr_t attrs) {
 
 void
 paging_map_page(uintptr_t *entry, uintptr_t va, void *page, uintptr_t attrs) {
-  paging_map_addr(entry, va, pa_from_va((uintptr_t)page), attrs);
+  paging_map_addr(entry, va, pa_from_ptr(page), attrs);
 }
 
 void *

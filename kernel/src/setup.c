@@ -84,7 +84,7 @@ setup_main(void) {
       add_region(e820map.map[i].addr, e820map.map[i].size);
 
   combine_consecutive_region();
-  remove_region(pa_from_va((uintptr_t)__kernel_start), pa_from_va((uintptr_t)__kernel_end));
+  remove_region(pa_from_ptr(__kernel_start), pa_from_ptr(__kernel_end));
 
   uintptr_t ramdisk_image = setup_header.ramdisk_image;
   initrd = (struct cpio_newc_header const *)ramdisk_image;
