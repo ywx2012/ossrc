@@ -233,7 +233,7 @@ include/types.h, include/string.h，app/libc/type.h定义的内容系统头文�
 
 *** 简化链接过程
 
-用链接脚本直接指定输出格式为binary，避免生成中间elf
+++用链接脚本直接指定输出格式为binary，避免生成中间elf++ (无力解决ld崩溃的问题，先生成elf再objcopy就不容易崩溃了，原因不明)
 
 把内核所有文件，一次链接到kernel.bin
 

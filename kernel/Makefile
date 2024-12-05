@@ -8,7 +8,8 @@ TARGETS := $(TARGETS) $($(DIR)_TARGETS)
 KERNEL_LDFLAGS := $(KERNEL_CFLAGS) -flto -no-pie -nostdlib -Wl,-T$(DIR)/linker.ld
 
 $(BUILDDIR)/kernel.bin: $(DIR)/linker.ld $($(DIR)_OBJS) | makedirs
-	$(V)gcc $(KERNEL_LDFLAGS) -o $@ $(filter $(BUILDDIR)/%,$^)
+	$(V)gcc $(KERNEL_LDFLAGS) -o ${@:%.bin=%.elf} $(filter $(BUILDDIR)/%,$^)
+	objcopy -I elf64-x86-64 -O binary ${@:%.bin=%.elf} $@
 
 $(BUILDDIR)/$(DIR)/realmode.o: $(DIR)/src/realmode.c | makedirs
 	$(V)gcc -MMD $(CFLAGS) $(INCLUDE_DIRS) -c -o $@ $<

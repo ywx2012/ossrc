@@ -1,5 +1,3 @@
-OUTPUT_FORMAT(binary);
-
 SECTIONS {
     . = 0x10000;
     __setup_start = .;
