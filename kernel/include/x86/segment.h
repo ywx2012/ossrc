@@ -56,7 +56,7 @@ struct tss {
     1,((limit)>>16)&0xF,0,1,0,(g),       \
     ((base)>>24)&0xFF }
 
-#define CODESEG(dpl) SEGMENT(0,0xFFFFF,1,0x9,(dpl)&0x3,1)
+#define CODESEG(dpl) SEGMENT(0,0xFFFFF,1,0xb,(dpl)&0x3,1)
 #define DATASEG(dpl) SEGMENT(0,0xFFFFF,1,0x3,(dpl)&0x3,1)
 #define TASKSEG(base,limit) SEGMENT((base),(limit),0,0x9,0,0)
 

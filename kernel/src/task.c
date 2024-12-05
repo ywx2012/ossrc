@@ -4,7 +4,6 @@
 #include <x86/segment.h>
 #include <kernel/task.h>
 #include <kernel/bsp.h>
-#include <kernel/selector.h>
 #include <kernel/paging.h>
 #include <kernel/frame.h>
 
@@ -12,7 +11,7 @@
 #define RSP 2
 #define RFLAGS_IF 0x200
 
-struct segment gdt[GDT_SIZE] = {
+static struct segment gdt[10] = {
   [KERNEL_CS_INDEX]=CODESEG(0),
   [KERNEL_SS_INDEX]=DATASEG(0),
   [USER_SS_INDEX]=DATASEG(3),
@@ -47,7 +46,6 @@ user_start(void) {
           : : "i"(RFLAGS_IF), "c"(USER_START));
 }
 
-
 __attribute__((naked))
 static
 void
@@ -72,9 +70,24 @@ idle_start(void) {
     __asm__("sti; hlt");
 }
 
+__attribute__((naked,noipa))
+static
+void
+load_gdt(void) {
+  __asm__("lgdt %0" : : "m"(gdtr));
+  __asm__("popq %%rax\n"
+          "pushq $%c0\n"
+          "pushq %%rax\n"
+          "lretq\n"
+          : : "i"(KERNEL_CS) : "rax", "memory");
+}
+
 void
 task_init(void) {
-  __asm__("lgdt %0" : : "m" (gdtr));
+  load_gdt();
+  __asm__("mov %w0, %%ss; mov %w0, %%ds; mov %w0, %%es" : : "r"(KERNEL_SS));
+  __asm__("mov %w0, %%fs; mov %w0, %%gs" : : "r"(0x0));
+
   uintptr_t base = (uintptr_t)&tss;
   struct segment tssd = TASKSEG(base, sizeof(tss));
   gdt[TSS_INDEX] = tssd;
@@ -151,6 +164,7 @@ resume(uintptr_t pa) {
   __builtin_longjmp(current->jmp_buf, 1);
 }
 
+__attribute__((noipa,naked))
 void
 task_switch() {
   struct node *node = current->task_node.next;

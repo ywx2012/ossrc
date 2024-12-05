@@ -19,12 +19,6 @@ struct cpio_newc_header {
   char    c_check[8];
 };
 
-
-struct cpio_newc_header const *
-cpio_lookup(struct cpio_newc_header const *, char const *);
-
-size_t
-cpio_get_size(struct cpio_newc_header const *);
-
-char const *
-cpio_get_content(struct cpio_newc_header const *);
+struct cpio_newc_header const *cpio_lookup(struct cpio_newc_header const *, char const *);
+size_t cpio_get_size(struct cpio_newc_header const *);
+char const *cpio_get_content(struct cpio_newc_header const *);

@@ -10,9 +10,6 @@
 #define BSP_STACK_SIZE PAGE_SIZE
 extern char bsp_stack[BSP_STACK_SIZE];
 
-#define GDT_SIZE 10
-extern struct segment gdt[GDT_SIZE];
-
 struct region {
   uintptr_t start;
   uintptr_t end;

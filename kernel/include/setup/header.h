@@ -1,3 +1,7 @@
 #pragma once
 
 #define CODE32_START 0x100000
+#define KERNEL_CS_INDEX 2
+#define KERNEL_SS_INDEX (KERNEL_CS_INDEX+1)
+#define KERNEL_CS (KERNEL_CS_INDEX<<3)
+#define KERNEL_SS (KERNEL_SS_INDEX<<3)

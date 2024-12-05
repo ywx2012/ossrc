@@ -1,9 +1,13 @@
 #include <setup/setup.h>
 #include <setup/header.h>
 #include <kernel/bsp.h>
-#include <kernel/selector.h>
 
 struct e820map e820map = {0};
+
+static struct segment gdt[] = {
+  [KERNEL_CS_INDEX]=CODESEG(0),
+  [KERNEL_SS_INDEX]=DATASEG(0),
+};
 
 struct dtr gdtr __attribute__((aligned(16))) = {
   .limit = sizeof(gdt) - 1,
@@ -98,9 +102,8 @@ setup_main(void) {
 __attribute__((naked))
 void
 setup_start(void) {
-  __asm__("mov %w0, %%ss" : : "r"(KERNEL_SS));
-  __asm__("mov %w0, %%ds; mov %w0, %%es" : : "r"(USER_SS));
-  __asm__("mov %w0, %%fs; mov %w0, %%gs" : : "r"(0x0));
+  __asm__("mov %w0, %%ss; mov %w0, %%ds; mov %w0, %%es; mov %w0, %%fs; mov %w0, %%gs"
+          : : "r"(KERNEL_SS));
   __asm__("mov %0, %%rsp" : : "r"(bsp_stack + sizeof(bsp_stack)));
   setup_main();
 }
