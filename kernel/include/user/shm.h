@@ -2,4 +2,4 @@
 
 #include <stdint.h>
 
-int shm_map(char const *name, uintptr_t va);
+int shm_map(char const *name, void *ptr);

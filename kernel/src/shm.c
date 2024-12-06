@@ -24,7 +24,8 @@ shm_init(void) {
 }
 
 int
-shm_map(char const* name, uintptr_t va) {
+shm_map(char const* name, void *ptr) {
+  uintptr_t va = (uintptr_t)ptr;
   struct shm* shm = NULL;
 
   FOREACH(node, shm_list) {

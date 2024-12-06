@@ -7,6 +7,6 @@
 #define GREEN 0xff00
 #define RED 0xff
 
-void draw_zh(int origin_x, int origin_y, int index, uint32_t color, unsigned long fbbase, struct fb_info* fb_info);
-void draw_en(int origin_x, int origin_y, int index, uint32_t color, unsigned long fbbase, struct fb_info* fb_info);
-void draw_rect(int origin_x, int origin_y, int l, int w, uint32_t color, unsigned long fbbase, struct fb_info* fb_info);
+void draw_zh(int origin_x, int origin_y, int index, uint32_t color, uint32_t *fbbase, struct fb_info* fb_info);
+void draw_en(int origin_x, int origin_y, int index, uint32_t color, uint32_t *fbbase, struct fb_info* fb_info);
+void draw_rect(int origin_x, int origin_y, int l, int w, uint32_t color, uint32_t *fbbase, struct fb_info* fb_info);

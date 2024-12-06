@@ -8,7 +8,7 @@
 #include <draw.h>
 
 static
-void draw_char(uint64_t fbaddr, struct fb_info* fb_info, uint32_t color) {
+void draw_char(uint32_t *fbaddr, struct fb_info* fb_info, uint32_t color) {
   // H
   draw_en(10, 2, 0, color, fbaddr, fb_info);
   // e
@@ -32,14 +32,13 @@ void draw_char(uint64_t fbaddr, struct fb_info* fb_info, uint32_t color) {
 
 int
 main(void) {
-  uintptr_t va = 0x4000000;
-  shm_map("shm-1", va);
-  char *m= (char *)va;
+  char *m = (char *)0x4000000;
+  shm_map("shm-1", m);
 
   struct fb_info fb_info;
   fb_get_info(&fb_info);
 
-  uintptr_t fbbase = 0xe000000;
+  uint32_t *fbbase = (uint32_t *)0xe000000;
   fb_map(fbbase);
   draw_char(fbbase, &fb_info, RED | GREEN);
 

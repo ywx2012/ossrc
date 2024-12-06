@@ -8,4 +8,4 @@ struct fb_info {
 };
 
 int fb_get_info(struct fb_info *fb_info);
-int fb_map(uintptr_t va);
+int fb_map(void *ptr);

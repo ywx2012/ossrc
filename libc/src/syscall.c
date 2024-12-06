@@ -9,13 +9,13 @@ timer_sleep(uintptr_t ms) {
 }
 
 int
-shm_map(char const *name, uintptr_t va) {
-  return syscall(SYS_SHM_MAP, (uintptr_t)name, va);
+shm_map(char const *name, void *ptr) {
+  return syscall(SYS_SHM_MAP, (uintptr_t)name, (uintptr_t)ptr);
 }
 
 int
-fb_map(uintptr_t va) {
-  return syscall(SYS_FB_MAP, va, 0);
+fb_map(void *ptr) {
+  return syscall(SYS_FB_MAP, (uintptr_t)ptr, 0);
 }
 
 int

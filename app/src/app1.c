@@ -9,16 +9,15 @@
 
 int
 main(void) {
-  uintptr_t va = 0x4000000;
-  shm_map("shm-1", va);
-  char *m= (char *)va;
+  char *m = (char *)0x4000000;
+  shm_map("shm-1", m);
 
   *m = 'S';
 
   struct fb_info fb_info;
   fb_get_info(&fb_info);
 
-  uintptr_t fbbase = 0xe000000;
+  uint32_t *fbbase = (uint32_t *)0xe000000;
   fb_map(fbbase);
 
   while (1) {

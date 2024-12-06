@@ -45,7 +45,8 @@ fb_get_info(struct fb_info *fb_info) {
 }
 
 int
-fb_map(uintptr_t va) {
+fb_map(void *ptr) {
+  uintptr_t va = (uintptr_t)ptr;
   uintptr_t pa = fb_base;
   size_t size = FB_XRES * FB_YRES * 4;
   for(size_t offset = 0; offset<size; offset+=PAGE_SIZE)
