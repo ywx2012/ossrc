@@ -1,31 +1,45 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include <print.h>
+#include <stddef.h>
 #include <timer.h>
 #include <shm.h>
 #include <fb.h>
-#include <draw.h>
+
+#define RED 0xff0000
+#define GREEN 0x00ff00
+#define BLUE 0x0000ff
+
+static struct fb_info fb_info;
+static uint32_t *fbbase = (uint32_t *)0xe000000;
+
+static
+void
+draw_rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color) {
+  for (uint16_t i=x; i<x+width; ++i) {
+    fbbase[fb_info.xres * y + i] = color;
+    fbbase[fb_info.xres * (y+height) + i] = color;
+  }
+
+  for (uint16_t i=y; i<y+height; ++i) {
+    fbbase[fb_info.xres * i + x] = color;
+    fbbase[fb_info.xres * i + x + width] = color;
+  }
+}
 
 int
 main(void) {
   char *m = (char *)0x4000000;
   shm_map("shm-1", m);
-
   *m = 'S';
-
-  struct fb_info fb_info;
   fb_get_info(&fb_info);
-
-  uint32_t *fbbase = (uint32_t *)0xe000000;
   fb_map(fbbase);
+  uint32_t color[] = {RED, GREEN, BLUE};
 
-  while (1) {
-    draw_rect(10, 100, 150, 100, RED, fbbase, &fb_info);
-    timer_sleep(1000);
-    draw_rect(10, 100, 150, 100, GREEN, fbbase, &fb_info);
-    timer_sleep(1000);
-    draw_rect(10, 100, 150, 100, BLUE, fbbase, &fb_info);
-    timer_sleep(1000);
+  for(;;) {
+    for (size_t i=0; i<sizeof(color)/sizeof(color[0]); ++i) {
+      draw_rect(10, 100, 150, 100, color[i]);
+      timer_sleep(1000);
+    }
   }
 }
