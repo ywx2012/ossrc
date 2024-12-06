@@ -130,7 +130,7 @@ task_create(size_t size, char const *data) {
     memcpy(page, data+offset, remain);
   }
 
-  struct task* task = malloc(sizeof(struct task));
+  struct task* task = (struct task *)frame_alloc(1);
   if (!task)
     return (uintptr_t)-1;
   task->id = id;
