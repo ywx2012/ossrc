@@ -52,7 +52,7 @@ void* malloc(size_t size) {
   }
   
   if (bdesc == NULL) {
-    bdesc = frame_alloc();
+    bdesc = frame_alloc(1);
     bdesc->freeptr = (void*)((unsigned long)bdesc + sizeof(struct bucket_desc));
     bdesc->next = NULL;
     bdesc->refcnt = 0;

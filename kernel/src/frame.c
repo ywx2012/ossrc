@@ -38,14 +38,16 @@ frame_init(void) {
 }
 
 void *
-frame_alloc(void) {
+frame_alloc(size_t n) {
   FOREACH(node, frame_list) {
     struct frame *frame = STRUCT_FROM_FIELD(struct frame, node, node);
-    frame->pages -= 1;
+    if (frame->pages < n)
+      continue;
+    frame->pages -= n;
     void *page = ((char *)frame) + PAGE_SIZE * (frame->pages);
     if (frame->pages == 0)
       list_remove(node);
-    memset(page, 0, PAGE_SIZE);
+    memset(page, 0, PAGE_SIZE * n);
     return page;
   }
 

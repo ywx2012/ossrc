@@ -6,6 +6,6 @@
 extern struct setup_header setup_header;
 extern struct e820map e820map;
 extern struct dtr gdtr;
-extern unsigned char font_data[128*16];
+extern uint8_t font_data[128*16];
 
 void setup_start(void);

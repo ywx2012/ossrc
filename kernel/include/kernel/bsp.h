@@ -6,6 +6,7 @@
 #include <x86/segment.h>
 #include <cpio.h>
 #include <list.h>
+#include <user/shm.h>
 
 #define BSP_STACK_SIZE PAGE_SIZE
 extern char bsp_stack[BSP_STACK_SIZE];
@@ -27,6 +28,9 @@ extern size_t initrd_size;
 
 extern struct node region_list;
 
+extern uint8_t const *glyphs;
+extern struct shm_info font_info;
+
 extern uintptr_t pml4[PAGE_SIZE/sizeof(uintptr_t)];
 
 void frame_init(void);
@@ -35,8 +39,9 @@ void fault_init(void);
 void irq_init(void);
 void timer_init(void);
 void shm_init(void);
-void atkbd_init(void);
+void font_init(void);
 void fb_init(void);
+void atkbd_init(void);
 void idt_init(void);
 
 void bsp_start(void);

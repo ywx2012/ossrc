@@ -8,7 +8,7 @@ timer_sleep(uintptr_t ms) {
 }
 
 int
-shm_map(char const *name, void *ptr) {
+shm_map(char const *name, void const *ptr) {
   return syscall(SYS_SHM_MAP, (uintptr_t)name, (uintptr_t)ptr);
 }
 

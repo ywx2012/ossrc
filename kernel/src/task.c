@@ -103,7 +103,7 @@ task_init(void) {
   wrmsr(MSR_LSTAR, (uintptr_t)syscall_handler);
   wrmsr(MSR_SFMASK, RFLAGS_IF);
 
-  void *stack = frame_alloc();
+  void *stack = frame_alloc(1);
   uintptr_t rsp0 = ((uintptr_t)stack) + PAGE_SIZE;
   uintptr_t *page_table = paging_alloc_table();
 
@@ -119,7 +119,7 @@ task_init(void) {
 uintptr_t
 task_create(size_t size, char const *data) {
   uintptr_t id = next_id++;
-  void *stack = frame_alloc();
+  void *stack = frame_alloc(1);
   uintptr_t rsp0 = ((uintptr_t)stack) + PAGE_SIZE;
   uintptr_t *page_table = paging_alloc_table();
 

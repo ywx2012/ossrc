@@ -7,7 +7,7 @@
 __attribute__((used,noreturn,aligned(1)))
 static
 void
-start(struct e820map *map, unsigned char *font, struct dtr *r, uint32_t pml4) {
+start(struct e820map *map, uint8_t *font, struct dtr *r, uint32_t pml4) {
   // https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/15_System_Address_Map_Interfaces/int-15h-e820h---query-system-address-map.html
   uint32_t nr_map = 0;
   uint32_t sig = 0x0534D4150; // SMAP

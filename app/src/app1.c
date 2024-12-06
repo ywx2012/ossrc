@@ -33,8 +33,8 @@ main(void) {
   *m = 'S';
   shm_get_info("fb-1", &fb_info);
   shm_map("fb-1", fbbase);
-  uint32_t color[] = {RED, GREEN, BLUE};
 
+  uint32_t color[] = {RED, GREEN, BLUE};
   for(;;) {
     for (size_t i=0; i<sizeof(color)/sizeof(color[0]); ++i) {
       draw_rect(10, 100, 150, 100, color[i]);

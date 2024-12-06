@@ -8,5 +8,5 @@ struct shm_info {
   uint16_t yres;
 };
 
-int shm_map(char const *name, void *ptr);
+int shm_map(char const *name, void const *ptr);
 int shm_get_info(char const *name, struct shm_info *shm_info);

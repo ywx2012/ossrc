@@ -28,7 +28,7 @@ shm_init(void) {
   shm1.info.size = PAGE_SIZE;
   shm1.info.xres = 1;
   shm1.info.yres = 1;
-  shm1.pte = pa_from_ptr(frame_alloc())|PTE_W;
+  shm1.pte = pa_from_ptr(frame_alloc(1))|PTE_W;
   shm_create(&shm1, "shm-1");
 }
 
@@ -44,7 +44,7 @@ find_shm(char const* name) {
 }
 
 int
-shm_map(char const* name, void *ptr) {
+shm_map(char const* name, void const *ptr) {
   uintptr_t va = (uintptr_t)ptr;
   struct shm *shm = find_shm(name);
   if (!shm)

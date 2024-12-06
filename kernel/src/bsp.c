@@ -31,6 +31,7 @@ bsp_start(void) {
   timer_init();
   shm_init();
   atkbd_init();
+  font_init();
   fb_init();
   idt_init();
 
