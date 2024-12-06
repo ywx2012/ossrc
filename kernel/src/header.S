@@ -102,6 +102,7 @@ start:
 
         pushl   $PA_FROM_VA(pml4)
         pushl   $(gdtr-base)
+        pushl   $(font_data-base)
         pushl   $(e820map-base)
         pushl   $0x0
 

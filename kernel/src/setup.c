@@ -14,6 +14,7 @@ struct dtr gdtr __attribute__((aligned(16))) = {
   .base = (uintptr_t)gdt,
 };
 
+unsigned char font_data[128*16];
 
 struct node region_list;
 static struct region regions[E820MAX+2];
