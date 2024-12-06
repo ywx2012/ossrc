@@ -2,10 +2,9 @@
 
 #include <stdint.h>
 
-#define SYS_TIMER_SLEEP 0
-#define SYS_SHM_MAP     1
-#define SYS_FB_MAP      2
-#define SYS_FB_GET_INFO 3
+#define SYS_TIMER_SLEEP  0
+#define SYS_SHM_MAP      1
+#define SYS_SHM_GET_INFO 2
 
 static
 inline

@@ -1,59 +1,64 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include <stdint.h>
 #include <string.h>
-#include <stdlib.h>
-#include <user/shm.h>
+#include <kernel/shm.h>
 #include <kernel/frame.h>
 #include <kernel/paging.h>
 #include <kernel/task.h>
 #include <kernel/bsp.h>
 
-struct shm {
-  char* name;
-  void *page;
-  struct node shm_node;
-};
-
 static struct node shm_list;
+static struct shm shm1;
+
+int
+shm_create(struct shm *shm, char const* name) {
+  size_t len = strlen(name);
+  if (len >= 8)
+    return -1;
+  memset(shm->name, 0, sizeof(shm->name));
+  memcpy(shm->name, name, len);
+  list_insert(&shm_list, &shm->shm_node);
+  return 0;
+}
 
 void
 shm_init(void) {
   list_init(&shm_list);
+  shm1.info.size = PAGE_SIZE;
+  shm1.info.xres = 1;
+  shm1.info.yres = 1;
+  shm1.pte = pa_from_ptr(frame_alloc())|PTE_W;
+  shm_create(&shm1, "shm-1");
+}
+
+static
+struct shm *
+find_shm(char const* name) {
+  FOREACH(node, shm_list) {
+    struct shm *shm = STRUCT_FROM_FIELD(struct shm, shm_node, node);
+    if (!strcmp(shm->name, name))
+      return shm;
+  }
+  return NULL;
 }
 
 int
 shm_map(char const* name, void *ptr) {
   uintptr_t va = (uintptr_t)ptr;
-  struct shm* shm = NULL;
+  struct shm *shm = find_shm(name);
+  if (!shm)
+    return -1;
+  for (size_t offset=0; offset<shm->info.size; offset+=PAGE_SIZE)
+    paging_map_addr(current->pml4, va+offset, (shm->pte+offset)|PTE_U);
+  return 0;
+}
 
-  FOREACH(node, shm_list) {
-    struct shm *s = STRUCT_FROM_FIELD(struct shm, shm_node, node);
-    if (!strcmp(s->name, name)) {
-      shm = s;
-      break;
-    }
-  }
-
-  if (!shm) {
-    shm = malloc(sizeof(struct shm));
-    if (!shm)
-      return -1;
-
-    size_t len = strlen(name);
-    shm->name = malloc(len + 1);
-    if (!(shm->name)) {
-      free(shm);
-      return -1;
-    }
-    memcpy(shm->name, name, len);
-    shm->name[len] = '\0';  
-    shm->page = frame_alloc();
-    list_insert(&shm_list, &shm->shm_node);
-  }
-
-  paging_map_page(current->pml4, va, shm->page, PTE_W|PTE_U);
-
+int
+shm_get_info(char const* name, struct shm_info *info) {
+  struct shm *shm = find_shm(name);
+  if (!shm)
+    return -1;
+  *info = shm->info;
   return 0;
 }

@@ -10,27 +10,28 @@ paging_alloc_table(void) {
 }
 
 void
-paging_map_addr(uintptr_t *entry, uintptr_t va, uintptr_t pa, uintptr_t attrs) {
+paging_map_addr(uintptr_t *entry, uintptr_t va, uintptr_t pte) {
   char offsets[3] = {39, 30, 21};
-  uintptr_t a = attrs & (PTE_W|PTE_U);
+  uintptr_t pa = PTE_ADDRESS(pte);
+  uintptr_t attrs = pte & (PTE_W|PTE_U);
 
   for (size_t i=0; i<sizeof(offsets); ++i) {
     uint16_t index = (va >> offsets[i]) & 0x1FF;
     entry = entry + index;
     if (!((*entry) & PTE_P)) {
       void *page = frame_alloc();
-      *entry = PTE_ADDRESS(pa_from_ptr(page))|PTE_P|a;
+      *entry = PTE_ADDRESS(pa_from_ptr(page))|PTE_P|attrs;
     }
     entry = (uintptr_t *)ptr_from_pa(PTE_ADDRESS(*entry));
   }
 
   uint16_t index = (va >> 12) & 0x1FF;
-  entry[index] = pa|PTE_P|a;
+  entry[index] = pa|PTE_P|attrs;
 }
 
 void
 paging_map_page(uintptr_t *entry, uintptr_t va, void *page, uintptr_t attrs) {
-  paging_map_addr(entry, va, pa_from_ptr(page), attrs);
+  paging_map_addr(entry, va, pa_from_ptr(page)|attrs);
 }
 
 void *

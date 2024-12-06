@@ -4,14 +4,13 @@
 #include <stddef.h>
 #include <print.h>
 #include <shm.h>
-#include <fb.h>
 #include <timer.h>
 
 #define AQUA    0x00FFFF
 #define FUCHSIA 0xFF00FF
 #define YELLOW  0xFFFF00
 
-static struct fb_info fb_info;
+static struct shm_info fb_info;
 static uint32_t *fbbase = (uint32_t *)0xe000000;
 
 static const uint8_t fonts_zh[2][32] = {
@@ -235,8 +234,8 @@ main(void) {
   char *m = (char *)0x4000000;
   shm_map("shm-1", m);
 
-  fb_get_info(&fb_info);
-  fb_map(fbbase);
+  shm_get_info("fb-1", &fb_info);
+  shm_map("fb-1", fbbase);
   uint32_t color[] = {AQUA, FUCHSIA, YELLOW};
 
   for(;;) {

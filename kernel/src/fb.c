@@ -1,9 +1,8 @@
 #include <sys/io.h>
 #include <pci.h>
-#include <user/fb.h>
 #include <kernel/bsp.h>
 #include <kernel/paging.h>
-#include <kernel/task.h>
+#include <kernel/shm.h>
 
 #define VBE_INDEX_PORT 0x01ce
 #define VBE_DATA_PORT 0x01cf
@@ -17,7 +16,7 @@
 #define FB_YRES 480
 #define FB_BPP  32
 
-static uint32_t fb_base;
+static struct shm fb1;
 
 void
 fb_init(void) {
@@ -34,22 +33,11 @@ fb_init(void) {
   outw(1, VBE_DATA_PORT);
 
   uint16_t addr = pci_find_device(0x1234, 0x1111, 0x1af4, 0x1100);
-  fb_base = pci_readl(addr, PCI_BASE_ADDRESS_0) & 0xFFFFFFF0;
-}
+  uint32_t fb_base = pci_readl(addr, PCI_BASE_ADDRESS_0) & 0xFFFFFFF0;
 
-int
-fb_get_info(struct fb_info *fb_info) {
-  fb_info->xres = FB_XRES;
-  fb_info->yres = FB_YRES;
-  return 0;
-}
-
-int
-fb_map(void *ptr) {
-  uintptr_t va = (uintptr_t)ptr;
-  uintptr_t pa = fb_base;
-  size_t size = FB_XRES * FB_YRES * 4;
-  for(size_t offset = 0; offset<size; offset+=PAGE_SIZE)
-    paging_map_addr(current->pml4, va+offset, pa+offset, PTE_W|PTE_U);
-  return 0;
+  fb1.info.size = FB_XRES * FB_YRES * sizeof(uint32_t);
+  fb1.info.xres = FB_XRES;
+  fb1.info.yres = FB_YRES;
+  fb1.pte = fb_base|PTE_W;
+  shm_create(&fb1, "fb-1");
 }
