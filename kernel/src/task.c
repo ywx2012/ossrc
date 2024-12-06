@@ -10,6 +10,7 @@
 #define RIP 1
 #define RSP 2
 #define RFLAGS_IF 0x200
+#define TASK_RSP0  0xFFFFFF8000000000
 
 static struct segment gdt[10] = {
   [KERNEL_CS_INDEX]=CODESEG(0),
@@ -24,6 +25,7 @@ static struct dtr gdtr __attribute__((aligned(16))) = {
 };
 
 static struct tss tss = {
+  .rsp = { [0] = TASK_RSP0 },
   .io_base = offsetof(struct tss, iomap),
   .iomap = {
     [sizeof(tss.iomap)-1] = 0xff,
@@ -103,14 +105,12 @@ task_init(void) {
   wrmsr(MSR_LSTAR, (uintptr_t)syscall_handler);
   wrmsr(MSR_SFMASK, RFLAGS_IF);
 
-  void *stack = frame_alloc(1);
-  uintptr_t rsp0 = ((uintptr_t)stack) + PAGE_SIZE;
   uintptr_t *page_table = paging_alloc_table();
+  paging_alloc_page(page_table, TASK_RSP0-PAGE_SIZE, PTE_W);
 
   idle.id = next_id++;
   idle.pml4 = page_table;
-  idle.rsp0 = rsp0;
-  idle.jmp_buf[RSP] = rsp0;
+  idle.jmp_buf[RSP] = TASK_RSP0;
   idle.jmp_buf[RIP] = (uintptr_t)idle_start;
   list_init(&idle.task_node);
   current = &idle;
@@ -119,9 +119,8 @@ task_init(void) {
 uintptr_t
 task_create(size_t size, char const *data) {
   uintptr_t id = next_id++;
-  void *stack = frame_alloc(1);
-  uintptr_t rsp0 = ((uintptr_t)stack) + PAGE_SIZE;
   uintptr_t *page_table = paging_alloc_table();
+  paging_alloc_page(page_table, TASK_RSP0-PAGE_SIZE, PTE_W);
 
   for (size_t offset=0; offset<size; offset+=PAGE_SIZE) {
     void *page = paging_alloc_page(page_table, USER_START+offset, PTE_W|PTE_U);
@@ -136,8 +135,7 @@ task_create(size_t size, char const *data) {
     return (uintptr_t)-1;
   task->id = id;
   task->pml4 = page_table;
-  task->rsp0 = rsp0;
-  task->jmp_buf[RSP] = rsp0;
+  task->jmp_buf[RSP] = TASK_RSP0;
   task->jmp_buf[RIP] = (uintptr_t)user_start;
   task_enqueue(task);
   return id;
@@ -175,7 +173,6 @@ task_switch() {
   if (node == &idle.task_node)
     node = node->next;
   struct task *next = STRUCT_FROM_FIELD(struct task, task_node, node);
-  tss.rsp[0] = next->rsp0;
   current = next;
   uintptr_t pa = pa_from_ptr(current->pml4);
   resume(pa);

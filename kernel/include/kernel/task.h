@@ -20,7 +20,6 @@
 struct task {
   uintptr_t id;
   uintptr_t *pml4;
-  uintptr_t rsp0;
   uintptr_t jmp_buf[5];
   struct node task_node;
   uintptr_t wakeup;
