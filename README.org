@@ -2,19 +2,17 @@
 
 经作者同意，上传到GitHub。仅供学习交流使用，分享转载请保留作者版权声明。
 
-可以前往[[https://book.douban.com/subject/36560814/][豆瓣]]和作者讨论交流。
+** 仓库说明
+
+Tags下面放的是完全没有任何改动的纯净版原始源码。内容和作者在[[https://pan.baidu.com/s/17aI64VBlrckMGIL0uhIVfw][百度盘]]上分享的代码完全相同。
+
+~main~ 分支如无必要，不对原始代码进行任何改动。如果不是运行不了，请勿开Issue。对于代码本身的讨论，请移步[[https://github.com/ywx2012/ossrc/discussions/new?category=q-a][讨论区]]。 *更建议前往[[https://book.douban.com/subject/36560814/][豆瓣]]和作者交流* ，因为作者并不时常光顾这里。
 
 ** 截图
 
 #+CAPTION: Screenshot
 #+NAME: fig:screenshot
 [[./screenshot.png]]
-
-** 仓库说明
-
-Tags下面放的是完全没有任何改动的纯净版原始源码。
-
-~main~ 分支如无必要，不对原始代码进行任何改动。
 
 ** 改动
 
