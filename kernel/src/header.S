@@ -100,7 +100,7 @@ start:
         mov     $0x70,  %dx
         out     %ax,    %dx
 
-        pushl   $PA_FROM_VA(pml4)
+        pushl   $PA_FROM_VA(pml2)
         pushl   $(gdtr-base)
         pushl   $(font_data-base)
         pushl   $(e820map-base)
@@ -109,14 +109,10 @@ start:
         .data
         .align  0x1000
 code32_start:
-pml3:
-        .quad   PTE_P|PTE_W|PTE_PS
-        .fill   511, 8, 0
-
         .align  0x1000
-        .globl  pml4
-pml4:
-        .quad   PA_FROM_VA(pml3)|PTE_P|PTE_W
-        .fill   255, 8, 0
-        .quad   PA_FROM_VA(pml3)|PTE_P|PTE_W
-        .fill   255, 8, 0
+        .globl  pml2
+pml2:
+        .long   0|PTE_P|PTE_W|PTE_PS
+        .fill   511, 4, 0
+        .long   0|PTE_P|PTE_W|PTE_PS
+        .fill   511, 4, 0

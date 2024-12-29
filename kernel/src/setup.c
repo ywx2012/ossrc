@@ -87,12 +87,17 @@ __attribute__((noipa))
 static
 void
 setup_main(void) {
+  for (size_t i=1; i<256; ++i) {
+    pml2[i] = (i<<22)|PTE_P|PTE_W|PTE_PS;
+    pml2[512+i] = (i<<22)|PTE_P|PTE_W|PTE_PS;
+  }
+
   va_offset = ((uintptr_t)__kernel_start)-CODE32_START;
 
   list_init(&region_list);
   for (uint32_t i=0; i<e820map.nr_map; ++i)
     if (e820map.map[i].type == E820_RAM)
-      add_region(e820map.map[i].addr, e820map.map[i].size);
+      add_region((uintptr_t)e820map.map[i].addr, (uintptr_t)e820map.map[i].size);
 
   combine_consecutive_region();
   remove_region(pa_from_ptr(__kernel_start), pa_from_ptr(__kernel_end));
@@ -111,6 +116,6 @@ void
 setup_start(void) {
   __asm__("mov %w0, %%ss; mov %w0, %%ds; mov %w0, %%es; mov %w0, %%fs; mov %w0, %%gs"
           : : "r"(KERNEL_SS));
-  __asm__("mov %0, %%rsp" : : "r"(bsp_stack + sizeof(bsp_stack)));
+  __asm__("mov %0, %%esp" : : "r"(bsp_stack + sizeof(bsp_stack)));
   setup_main();
 }

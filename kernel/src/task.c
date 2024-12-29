@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
+#include <kernel/string.h>
 #include <x86/msr.h>
 #include <x86/segment.h>
 #include <kernel/task.h>
@@ -7,25 +6,25 @@
 #include <kernel/paging.h>
 #include <kernel/frame.h>
 
-#define RIP 1
-#define RSP 2
-#define RFLAGS_IF 0x200
-#define TASK_RSP0  0xFFFFFF8000000000
+#define EIP 1
+#define ESP 2
+#define TASK_ESP0  0xfffff000
 
 static struct segment gdt[10] = {
   [KERNEL_CS_INDEX]=CODESEG(0),
   [KERNEL_SS_INDEX]=DATASEG(0),
-  [USER_SS_INDEX]=DATASEG(3),
   [USER_CS_INDEX]=CODESEG(3),
+  [USER_SS_INDEX]=DATASEG(3),
 };
 
 static struct dtr gdtr __attribute__((aligned(16))) = {
-  .base = (uintptr_t)gdt,
   .limit = sizeof(gdt) - 1,
+  .base = (uintptr_t)gdt,
 };
 
 static struct tss tss = {
-  .rsp = { [0] = TASK_RSP0 },
+  .esp0 = TASK_ESP0,
+  .ss0 = KERNEL_SS,
   .io_base = offsetof(struct tss, iomap),
   .iomap = {
     [sizeof(tss.iomap)-1] = 0xff,
@@ -42,30 +41,22 @@ __attribute__((naked,noreturn))
 static
 void
 user_start(void) {
-  __asm__("mov %c0, %%r11\n"
-          "mov $0x8000000, %%rsp\n"
-          "sysretq"
-          : : "i"(RFLAGS_IF), "c"(USER_START));
+  __asm__("sysexit" : : "c"(0x8000000), "d"(USER_START));
 }
 
 __attribute__((naked))
 static
 void
 syscall_handler(void) {
-  __asm__("movq %%rsp, %%r10\n"
-          "movq (tss+4)(%%rip), %%rsp\n"
-          "pushq %%r10\n"
-          "pushq %%rcx\n"
-          "pushq %%r11\n"
-          "movabs %0, %%r10\n"
-          "call *%%r10\n"
-          "popq %%r11\n"
-          "popq %%rcx\n"
-          "popq %%rsp\n"
-          "sysretq"
-          :
-          : "i"(system_call)
-          :"r10");
+  __asm__ (
+           "pushl %%ebx;"
+           "pushl %%ecx;"
+           "pushl %%edx;"
+           "call %c0;"
+           "mov %%edi, %%edx;"
+           "mov %%esi, %%ecx;"
+           "sysexit"
+           : : "i"(system_call));
 }
 
 __attribute__((naked,noreturn))
@@ -81,37 +72,33 @@ static
 void
 load_gdt(void) {
   __asm__("lgdt %0" : : "m"(gdtr));
-  __asm__("popq %%rax\n"
-          "pushq $%c0\n"
-          "pushq %%rax\n"
-          "lretq\n"
-          : : "i"(KERNEL_CS) : "rax", "memory");
+  __asm__ goto ("ljmpl $%c0, $%l1": : "i"(KERNEL_CS) : "memory" : next);
+ next:
+  __asm__("mov %w0, %%ss" : : "r"(KERNEL_SS));
+  __asm__("mov %w0, %%ds; mov %w0, %%es; mov %w0, %%fs; mov %w0, %%gs" : : "r"(USER_SS));
+  __asm__("ret");
 }
 
 void
 task_init(void) {
   load_gdt();
-  __asm__("mov %w0, %%ss; mov %w0, %%ds; mov %w0, %%es" : : "r"(KERNEL_SS));
-  __asm__("mov %w0, %%fs; mov %w0, %%gs" : : "r"(0x0));
 
   uintptr_t base = (uintptr_t)&tss;
   struct segment tssd = TASKSEG(base, sizeof(tss));
   gdt[TSS_INDEX] = tssd;
-  *(uint64_t *)(gdt+TSS_INDEX+1) = (base>>32);
   __asm__ ("ltr %w0" : : "r"(TSS));
 
-  uint64_t star_val = ((uint64_t)USER_CS32) << 48  | ((uint64_t)KERNEL_CS) << 32;
-  wrmsr(MSR_STAR, star_val);
-  wrmsr(MSR_LSTAR, (uintptr_t)syscall_handler);
-  wrmsr(MSR_SFMASK, RFLAGS_IF);
+  wrmsr(MSR_IA32_SYSENTER_CS, 0x08);
+  wrmsr(MSR_IA32_SYSENTER_EIP, (uintptr_t)syscall_handler);
+  wrmsr(MSR_IA32_SYSENTER_ESP, TASK_ESP0);
 
   uintptr_t *page_table = paging_alloc_table();
-  paging_alloc_page(page_table, TASK_RSP0-PAGE_SIZE, PTE_W);
+  paging_alloc_page(page_table, TASK_ESP0-PAGE_SIZE, PTE_W);
 
   idle.id = next_id++;
-  idle.pml4 = page_table;
-  idle.jmp_buf[RSP] = TASK_RSP0;
-  idle.jmp_buf[RIP] = (uintptr_t)idle_start;
+  idle.pml2 = page_table;
+  idle.jmp_buf[ESP] = TASK_ESP0;
+  idle.jmp_buf[EIP] = (uintptr_t)idle_start;
   list_init(&idle.task_node);
   current = &idle;
 }
@@ -120,7 +107,7 @@ uintptr_t
 task_create(size_t size, char const *data) {
   uintptr_t id = next_id++;
   uintptr_t *page_table = paging_alloc_table();
-  paging_alloc_page(page_table, TASK_RSP0-PAGE_SIZE, PTE_W);
+  paging_alloc_page(page_table, TASK_ESP0-PAGE_SIZE, PTE_W);
 
   for (size_t offset=0; offset<size; offset+=PAGE_SIZE) {
     void *page = paging_alloc_page(page_table, USER_START+offset, PTE_W|PTE_U);
@@ -134,9 +121,9 @@ task_create(size_t size, char const *data) {
   if (!task)
     return (uintptr_t)-1;
   task->id = id;
-  task->pml4 = page_table;
-  task->jmp_buf[RSP] = TASK_RSP0;
-  task->jmp_buf[RIP] = (uintptr_t)user_start;
+  task->pml2 = page_table;
+  task->jmp_buf[ESP] = TASK_ESP0;
+  task->jmp_buf[EIP] = (uintptr_t)user_start;
   task_enqueue(task);
   return id;
 }
@@ -159,7 +146,7 @@ task_yield() {
 }
 
 static
-__attribute__((noipa,naked))
+__attribute__((noipa,naked,fastcall))
 void
 resume(uintptr_t pa) {
   __asm__("mov %0, %%cr3" : : "a"(pa));
@@ -174,6 +161,6 @@ task_switch() {
     node = node->next;
   struct task *next = STRUCT_FROM_FIELD(struct task, task_node, node);
   current = next;
-  uintptr_t pa = pa_from_ptr(current->pml4);
+  uintptr_t pa = pa_from_ptr(current->pml2);
   resume(pa);
 }

@@ -1,4 +1,4 @@
-#include <sys/io.h>
+#include <x86/io.h>
 #include <x86/pit.h>
 
 #define IOPORT_CONTROL 0x43

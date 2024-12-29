@@ -31,7 +31,7 @@ extern struct node region_list;
 extern uint8_t const *glyphs;
 extern struct shm_info font_info;
 
-extern uintptr_t pml4[PAGE_SIZE/sizeof(uintptr_t)];
+extern uintptr_t pml2[PAGE_SIZE/sizeof(uintptr_t)];
 
 void frame_init(void);
 void task_init(void);

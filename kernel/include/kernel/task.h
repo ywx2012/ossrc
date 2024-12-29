@@ -6,20 +6,18 @@
 
 #define KERNEL_CS_INDEX 1
 #define KERNEL_SS_INDEX (KERNEL_CS_INDEX+1)
-#define USER_CS32_INDEX 3
-#define USER_SS_INDEX (USER_CS32_INDEX+1)
-#define USER_CS_INDEX (USER_SS_INDEX+1)
+#define USER_CS_INDEX 3
+#define USER_SS_INDEX (USER_CS_INDEX+1)
 #define TSS_INDEX 6
 #define KERNEL_CS (KERNEL_CS_INDEX<<3)
 #define KERNEL_SS (KERNEL_SS_INDEX<<3)
-#define USER_CS32 ((USER_CS32_INDEX<<3)|0x3)
 #define USER_CS ((USER_CS_INDEX<<3)|0x3)
 #define USER_SS ((USER_SS_INDEX<<3)|0x3)
 #define TSS (TSS_INDEX<<3)
 
 struct task {
   uintptr_t id;
-  uintptr_t *pml4;
+  uintptr_t *pml2;
   uintptr_t jmp_buf[5];
   struct node task_node;
   uintptr_t wakeup;

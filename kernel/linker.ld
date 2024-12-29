@@ -1,3 +1,5 @@
+OUTPUT_FORMAT(binary);
+
 SECTIONS {
     . = 0x10000;
     __setup_start = .;
@@ -12,7 +14,7 @@ SECTIONS {
     __setup_size = SIZEOF(.setup);
     __setup_sects = ABSOLUTE((__setup_size>>9)-1);
 
-    . = 0xFFFF800000100000;
+    . = 0x80100000;
     __kernel_start = .;
     .data : AT(ADDR(.data) - __kernel_start + SIZEOF(.setup)) {
       build/kernel/header.o(.data);

@@ -1,4 +1,4 @@
-#include <sys/io.h>
+#include <x86/io.h>
 #include <x86/pic.h>
 
 #define A0 1

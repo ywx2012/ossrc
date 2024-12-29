@@ -40,5 +40,6 @@ bsp_start(void) {
 
   frame_reclaim((uintptr_t)initrd, ((uintptr_t)initrd) + initrd_size);
   frame_reclaim((uintptr_t)__setup_start, (uintptr_t)__setup_end);
+
   task_switch();
 }

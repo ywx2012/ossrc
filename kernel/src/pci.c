@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include <sys/io.h>
+#include <x86/io.h>
 #include <pci.h>
 
 #define CONFIG_ADDR_PORT 0xCF8

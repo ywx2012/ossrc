@@ -5,18 +5,19 @@
 uintptr_t *
 paging_alloc_table(void) {
   uintptr_t *table = (uintptr_t *)frame_alloc(1);
-  table[256] = pml4[256];
+  for (size_t i=0; i<256; ++i)
+    table[512+i] = pml2[512+i];
   return table;
 }
 
 void
 paging_map_addr(uintptr_t *entry, uintptr_t va, uintptr_t pte) {
-  char offsets[3] = {39, 30, 21};
+  char offsets[1] = {22};
   uintptr_t pa = PTE_ADDRESS(pte);
   uintptr_t attrs = pte & (PTE_W|PTE_U);
 
   for (size_t i=0; i<sizeof(offsets); ++i) {
-    uint16_t index = (va >> offsets[i]) & 0x1FF;
+    uint16_t index = (va >> offsets[i]) & 0x3FF;
     entry = entry + index;
     if (!((*entry) & PTE_P)) {
       void *page = frame_alloc(1);
@@ -25,7 +26,7 @@ paging_map_addr(uintptr_t *entry, uintptr_t va, uintptr_t pte) {
     entry = (uintptr_t *)ptr_from_pa(PTE_ADDRESS(*entry));
   }
 
-  uint16_t index = (va >> 12) & 0x1FF;
+  uint16_t index = (va >> 12) & 0x3FF;
   entry[index] = pa|PTE_P|attrs;
 }
 

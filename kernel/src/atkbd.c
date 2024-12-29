@@ -2,7 +2,7 @@
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
 #include <stdint.h>
-#include <sys/io.h>
+#include <x86/io.h>
 #include <x86/pic.h>
 #include <user/print.h>
 #include <kernel/irq.h>
@@ -107,6 +107,6 @@ atkbd_init(void) {
 
   outb(ENABLE_PORT1, CMD_REG);
 
-  irq_set_handler(IRQ_KBD, 0, kb_handler);
+  irq_set_handler(IRQ_KBD, kb_handler);
   pic_enable(IRQ_KBD);
 }

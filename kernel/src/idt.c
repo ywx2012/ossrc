@@ -11,7 +11,7 @@ static struct dtr idtr __attribute__((aligned(16))) = {
 
 static
 void
-set_gate(uint8_t number, unsigned type, unsigned ist, uintptr_t offset) {
+set_gate(uint8_t number, unsigned type, uintptr_t offset) {
   struct gate gate = {0};
   gate.s = 0;
   gate.size = 1;
@@ -19,10 +19,8 @@ set_gate(uint8_t number, unsigned type, unsigned ist, uintptr_t offset) {
   gate.dpl = 0;
   gate.segment_selector = KERNEL_CS;
   gate.offset = (offset & 0xFFFF);
-  gate.offset_l = (offset >> 16) & 0xFFFF;
-  gate.offset_q = (uint32_t)((offset >> 32) & 0xFFFFFFFF);
+  gate.offset_l = (uint16_t)((offset >> 16) & 0xFFFF);
   gate.present = 1;
-  gate.ist = ist&0x7;
   idt[number] = gate;
 }
 
@@ -32,11 +30,11 @@ idt_init(void) {
 }
 
 void
-idt_set_int_handler(uint8_t number, uint8_t ist, void (*handler)(struct interrupt_frame *)) {
-  set_gate(number, GATE_TYPE_INT, ist, (uintptr_t)handler);
+idt_set_int_handler(uint8_t number, void (*handler)(struct interrupt_frame *)) {
+  set_gate(number, GATE_TYPE_INT, (uintptr_t)handler);
 }
 
 void
-idt_set_exc_handler(uint8_t number, uint8_t ist, void (*handler)(struct interrupt_frame *, uintptr_t)) {
-  set_gate(number, GATE_TYPE_TRAP, ist, (uintptr_t)handler);
+idt_set_exc_handler(uint8_t number, void (*handler)(struct interrupt_frame *, uintptr_t)) {
+  set_gate(number, GATE_TYPE_TRAP, (uintptr_t)handler);
 }

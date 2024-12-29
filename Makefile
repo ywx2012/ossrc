@@ -20,7 +20,7 @@ DETECT_CFLAGS := \
 BUILDDIR ?= build
 SUBDIRS := $(wildcard */Makefile)
 TARGETS := $(BUILDDIR)/initrd.bin
-CFLAGS := -mgeneral-regs-only -fno-stack-protector -fno-builtin -ffreestanding -std=c11 \
+CFLAGS := -m32 -fno-pie -mgeneral-regs-only -fno-stack-protector -fno-builtin -ffreestanding -std=c11 \
 	-Werror -Wall -Wextra \
 	-pedantic -pedantic-errors -Wno-long-long \
 	-Waggregate-return \
@@ -72,7 +72,8 @@ CFLAGS := -mgeneral-regs-only -fno-stack-protector -fno-builtin -ffreestanding -
 	-Wunused-const-variable=2 \
 	$(DETECT_CFLAGS)
 
-KERNEL_CFLAGS = $(CFLAGS) -fno-pie -fcf-protection=none -mno-red-zone
+KERNEL_CFLAGS = $(CFLAGS) -fcf-protection=none -mno-red-zone
+LDFLAGS := -m elf_i386 -no-pie
 
 -include $(SUBDIRS)
 

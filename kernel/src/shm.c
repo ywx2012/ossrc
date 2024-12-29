@@ -1,7 +1,7 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include <string.h>
+#include <kernel/string.h>
 #include <kernel/shm.h>
 #include <kernel/frame.h>
 #include <kernel/paging.h>
@@ -50,7 +50,7 @@ shm_map(char const* name, void const *ptr) {
   if (!shm)
     return -1;
   for (size_t offset=0; offset<shm->info.size; offset+=PAGE_SIZE)
-    paging_map_addr(current->pml4, va+offset, (shm->pte+offset)|PTE_U);
+    paging_map_addr(current->pml2, va+offset, (shm->pte+offset)|PTE_U);
   return 0;
 }
 

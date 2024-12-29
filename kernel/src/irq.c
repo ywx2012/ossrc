@@ -11,6 +11,6 @@ irq_init(void) {
 }
 
 void
-irq_set_handler(uint8_t number, uint8_t ist, int_handler handler) {
-  idt_set_int_handler((uint8_t)(IRQ_OFFSET+number), ist, handler);
+irq_set_handler(uint8_t number, int_handler handler) {
+  idt_set_int_handler((uint8_t)(IRQ_OFFSET+number), handler);
 }

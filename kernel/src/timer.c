@@ -32,7 +32,7 @@ timer_handler(struct interrupt_frame *frame __attribute__((unused))) {
 void
 timer_init(void) {
   list_init(&idle.timer_node);
-  irq_set_handler(IRQ_PIT0, 0, timer_handler);
+  irq_set_handler(IRQ_PIT0, timer_handler);
   pit_set_mode(0, PIT_MODE_RATEGEN);
   pit_set_count(0, PIT_FREQ/HZ);
   pic_enable(IRQ_PIT0);
