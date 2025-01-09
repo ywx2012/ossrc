@@ -2,6 +2,14 @@
 #include <timer.h>
 #include <shm.h>
 
+void main(void);
+
+static
+__attribute__((used, naked, section(".start")))
+void _start(void) {
+  main();
+}
+
 int
 timer_sleep(uintptr_t ms) {
   return syscall(SYS_TIMER_SLEEP, ms, 0);
