@@ -35,8 +35,8 @@ bsp_start(void) {
   fb_init();
   idt_init();
 
-  spawn_task("app1.bin");
-  spawn_task("app2.bin");
+  spawn_task("app1.elf");
+  spawn_task("app2.elf");
 
   frame_reclaim((uintptr_t)initrd, ((uintptr_t)initrd) + initrd_size);
   frame_reclaim((uintptr_t)__setup_start, (uintptr_t)__setup_end);

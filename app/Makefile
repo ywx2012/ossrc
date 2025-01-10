@@ -1,8 +1,8 @@
 DIR := $(lastword $(MAKEFILE_LIST:/Makefile=))
 
 -include common.mk
-$(DIR)_TARGETS := $($(DIR)_OBJS:%.o=%.bin)
+$(DIR)_TARGETS := $($(DIR)_OBJS:%.o=%.elf)
 TARGETS := $(TARGETS) $($(DIR)_TARGETS)
 
-$(BUILDDIR)/$(DIR)/%.bin: $(BUILDDIR)/$(DIR)/%.o | makedirs libs
+$(BUILDDIR)/$(DIR)/%.elf: $(BUILDDIR)/$(DIR)/%.o | makedirs libs
 	$(V)ld $(LDFLAGS) -o $@ $^ $(LIBS)
