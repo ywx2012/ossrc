@@ -7,6 +7,8 @@
 #include <kernel/paging.h>
 #include <kernel/frame.h>
 
+#include <elf.h>
+
 #define RIP 1
 #define RSP 2
 #define RFLAGS_IF 0x200
@@ -117,17 +119,28 @@ task_init(void) {
 }
 
 uintptr_t
-task_create(size_t size, char const *data) {
+task_create(size_t size __attribute__((unused)), char const *data) {
   uintptr_t id = next_id++;
   uintptr_t *page_table = paging_alloc_table();
   paging_alloc_page(page_table, TASK_RSP0-PAGE_SIZE, PTE_W);
 
-  for (size_t offset=0; offset<size; offset+=PAGE_SIZE) {
-    void *page = paging_alloc_page(page_table, USER_START+offset, PTE_W|PTE_U);
-    uintptr_t remain = size - offset;
-    if (remain > PAGE_SIZE)
-      remain = PAGE_SIZE;
-    memcpy(page, data+offset, remain);
+  Elf64_Ehdr const *ehdr = (Elf64_Ehdr const *)(uintptr_t)data;
+  uintptr_t phstart = ehdr->e_phoff;
+  uintptr_t phentsize = ehdr->e_phentsize;
+  uintptr_t phend = phstart + phentsize * ehdr->e_phnum;
+
+  for (uintptr_t phoff=phstart; phoff<phend; phoff+=phentsize) {
+    Elf64_Phdr const *phdr = (Elf64_Phdr const *)(uintptr_t)(data + phoff);
+    if (phdr->p_type != PT_LOAD)
+      continue;
+    size_t sz = phdr->p_filesz;
+    for (size_t offset=0; offset<sz; offset+=PAGE_SIZE) {
+      void *page = paging_alloc_page(page_table, phdr->p_vaddr+offset, PTE_W|PTE_U);
+      uintptr_t remain = sz - offset;
+      if (remain > PAGE_SIZE)
+        remain = PAGE_SIZE;
+      memcpy(page, data+phdr->p_offset+offset, remain);
+    }
   }
 
   struct task* task = (struct task *)frame_alloc(1);
