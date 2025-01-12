@@ -1,11 +1,13 @@
 #include <asm/boot.h>
 #include <asm/bootparam.h>
+#include <asm/processor-flags.h>
+#include <x86/msr.h>
 #include <x86/page.h>
 #include <setup/header.h>
 
 #define PA_FROM_VA(x) (((x)-code32_start)+CODE32_START)
 
-        .code16
+        .code16gcc
         .globl setup_header
         .text
 base:
@@ -100,11 +102,26 @@ start:
         mov     $0x70,  %dx
         out     %ax,    %dx
 
-        pushl   $PA_FROM_VA(pml4)
-        pushl   $(gdtr-base)
-        pushl   $(font_data-base)
         pushl   $(e820map-base)
-        pushl   $0x0
+        call    bios_load_map
+
+        pushl   $(font_data-base)
+        call    bios_load_font
+
+        lgdt    gdtr-base
+        movl    $(X86_CR4_PSE|X86_CR4_PAE), %eax
+        movl    %eax, %cr4
+        movl    $PA_FROM_VA(pml4), %eax
+        movl    %eax, %cr3
+
+        movl    $(MSR_EFER), %ecx
+        movl    $(MSR_EFER_SCE|MSR_EFER_LME), %eax
+        movl    $0, %edx
+        wrmsr
+
+        movl    $(X86_CR0_PE|X86_CR0_PG), %eax
+        movl    %eax, %cr0
+        ljmpl   $(KERNEL_CS), $setup_start
 
         .data
         .align  0x1000
