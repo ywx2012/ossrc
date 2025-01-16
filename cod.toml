@@ -1,0 +1,5 @@
+[project]
+
+[repo.mob]
+type = "local"
+path = "."

@@ -1,0 +1,7 @@
+[package]
+name = "bios"
+version = "1.0"
+arch = ["i686"]
+
+[build]
+cflags = ["-m16"]

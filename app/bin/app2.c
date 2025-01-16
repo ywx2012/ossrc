@@ -1,10 +1,10 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include <stddef.h>
-#include <print.h>
-#include <shm.h>
-#include <timer.h>
+#include <stdint.h>
+#include <mob/print.h>
+#include <mob/shm.h>
+#include <mob/timer.h>
 
 #define AQUA    0x00FFFF
 #define FUCHSIA 0xFF00FF

@@ -6,7 +6,7 @@
 #include <x86/segment.h>
 #include <cpio.h>
 #include <list.h>
-#include <user/shm.h>
+#include <mob/shm.h>
 
 #define BSP_STACK_SIZE PAGE_SIZE
 extern char bsp_stack[BSP_STACK_SIZE];

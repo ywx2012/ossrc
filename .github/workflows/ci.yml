@@ -126,19 +126,36 @@ jobs:
         ${{ matrix.distro.name || 'ubuntu' }}_compile
         ${{ matrix.distro.name || 'ubuntu' }}_qemu
 
+    - run: |
+        BREAK=$(python3 -m pip install --help | grep -q break-system-packages && echo '--break-system-packages' || true)
+
+        python3 -m pip install ${BREAK} -i "https://tanhaoqiang.github.io/simple" solv
+
+        python3 -m pip install ${BREAK} "git+https://github.com/tanhaoqiang/cod.git"
+
     - name: Checkout
       uses: actions/checkout@v4
 
     - name: Build
       run: |
-        gcc --verbose
+        cd mob
+        cod package
+        cd ../libc
+        cod package
+        cd ../app
+        cod build
+        cd ../bios
+        cod package
+        cd ../kernel
+        cod build
+        cd ..
         make VERBOSE=1
 
     - name: Run and take screenshot
       shell: bash
       run: |
         exec 3<> <(cat)
-        ${{ matrix.distro.qemu || 'qemu-system-x86_64' }} -net none -boot reboot-timeout=0 -action reboot=shutdown -chardev stdio,id=mon1 -mon chardev=mon1,mode=control -display vnc=:0 -kernel build/kernel.bin -initrd build/initrd.bin <&3 &
+        ${{ matrix.distro.qemu || 'qemu-system-x86_64' }} -net none -boot reboot-timeout=0 -action reboot=shutdown -chardev stdio,id=mon1 -mon chardev=mon1,mode=control -display vnc=:0 -kernel kernel.bin -initrd initrd.bin <&3 &
         sleep 30
         echo '{ "execute": "qmp_capabilities", "arguments": { } }' >&3
         echo '{ "execute": "screendump", "arguments": { "filename": "/tmp/screenshot.ppm" } }' >&3

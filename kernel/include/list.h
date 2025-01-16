@@ -7,7 +7,7 @@ struct node {
   struct node *next;
 };
 
-#define STRUCT_FROM_FIELD(type,field,ptr) ((type *)(((uintptr_t)ptr)-offsetof(type, field)))
+#define STRUCT_FROM_FIELD(type,field,ptr) ((type *)(((uintptr_t)ptr)-__builtin_offsetof(type, field)))
 #define FOREACH(var,list) for (struct node *var=list.next; var!=&list; var=var->next)
 
 void list_init(struct node *list);

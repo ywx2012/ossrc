@@ -1,0 +1,11 @@
+[package]
+name = "kernel"
+version = "1.0"
+arch = ["i686"]
+
+[export]
+cflags = ["-fno-pie", "-fno-pic", "-mgeneral-regs-only", "-fno-stack-protector", "-fcf-protection=none", "-mno-red-zone", "-std=c11", "-nostdinc", "-fno-builtin"]
+
+[build]
+linker-script = "linker.ld"
+format = "binary"

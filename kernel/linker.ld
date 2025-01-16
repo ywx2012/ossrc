@@ -1,12 +1,9 @@
-OUTPUT_FORMAT(binary);
-
 SECTIONS {
     . = 0x10000;
     __setup_start = .;
     .setup : AT(0x0) {
-      build/kernel/header.o(.text);
-      build/kernel/realmode.o(.text);
-      build/kernel/setup.o(.text .rodata .rodata.* .data .bss);
+      *(.header);
+      *(.boot.* .setup.*);
       FILL(0);
       . = ALIGN(4096);
     }
@@ -17,7 +14,7 @@ SECTIONS {
     . = 0x80100000;
     __kernel_start = .;
     .data : AT(ADDR(.data) - __kernel_start + SIZEOF(.setup)) {
-      build/kernel/header.o(.data);
+      *(.header.data);
       *(.data .rodata .rodata.* .ldata);
       *(.bss);
     }

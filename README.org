@@ -14,6 +14,8 @@ Tags下面放的是完全没有任何改动的纯净版原始源码。
 
 ~mob32~ 32位内核
 
+~cod32~ 使用cod包管理器
+
 ** 截图
 
 #+CAPTION: Screenshot
@@ -49,7 +51,7 @@ Tags下面放的是完全没有任何改动的纯净版原始源码。
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/alpine
-apk add make gcc cpio musl-dev linux-headers
+apk add make cpio git python3 py3-pip
 #+END_SRC
 
 ***** 安装QEMU
@@ -63,7 +65,7 @@ apk add qemu-system-x86_64
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/alt
-apt-get install make gcc cpio
+apt-get install make cpio git python3 pip
 #+END_SRC
 
 ***** 安装QEMU
@@ -77,7 +79,7 @@ apt-get install qemu-system-x86-core
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/archlinux
-pacman -S make gcc cpio
+pacman -S make cpio git python python-pip
 #+END_SRC
 
 ***** 安装QEMU
@@ -91,7 +93,7 @@ pacman -S qemu-system-x86
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/centos
-dnf install --setopt=install_weak_deps=False make gcc cpio
+dnf install --setopt=install_weak_deps=False make cpio git python3 python3-pip
 #+END_SRC
 
 ***** 安装QEMU
@@ -105,7 +107,7 @@ dnf install --setopt=install_weak_deps=False qemu-kvm
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/debian
-apt-get --no-install-recommends install make gcc cpio libc6-dev
+apt-get --no-install-recommends install make cpio git python3 ca-certificates python3-pip
 #+END_SRC
 
 ***** 安装QEMU
@@ -119,7 +121,7 @@ apt-get --no-install-recommends install qemu-system-x86
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/fedora
-dnf install --setopt=install_weak_deps=False make gcc cpio
+dnf install --setopt=install_weak_deps=False make cpio git python3 python3-pip
 #+END_SRC
 
 ***** 安装QEMU
@@ -133,7 +135,7 @@ dnf install --setopt=install_weak_deps=False qemu-system-x86-core
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/mageia
-dnf install --setopt=install_weak_deps=False make gcc cpio
+dnf install --setopt=install_weak_deps=False make cpio git python3 python3-pip
 #+END_SRC
 
 ***** 安装QEMU
@@ -146,10 +148,8 @@ dnf install --setopt=install_weak_deps=False qemu-system-x86-core
 
 ***** 安装编译工具
 
-gcc默认是7，至少需要10才可以
-
 #+BEGIN_SRC sh :tangle tmp/compile/opensuse
-zypper install --no-recommends make gcc10 cpio && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+zypper install --no-recommends make cpio git python3 python3-pip
 #+END_SRC
 
 ***** 安装QEMU
@@ -163,7 +163,7 @@ zypper install --no-recommends qemu-x86
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/ubuntu
-apt-get --no-install-recommends install make gcc cpio libc6-dev
+apt-get --no-install-recommends install make git cpio python3 ca-certificates python3-pip
 #+END_SRC
 
 ***** 安装QEMU
@@ -177,7 +177,7 @@ apt-get --no-install-recommends install qemu-system-x86
 ***** 安装编译工具
 
 #+BEGIN_SRC sh :tangle tmp/compile/void
-xbps-install -S make gcc cpio
+xbps-install -S make cpio git python3 python3-pip
 #+END_SRC
 
 ***** 安装QEMU

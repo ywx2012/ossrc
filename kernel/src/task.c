@@ -26,7 +26,7 @@ static struct dtr gdtr __attribute__((aligned(16))) = {
 static struct tss tss = {
   .esp0 = TASK_ESP0,
   .ss0 = KERNEL_SS,
-  .io_base = offsetof(struct tss, iomap),
+  .io_base = __builtin_offsetof(struct tss, iomap),
   .iomap = {
     [sizeof(tss.iomap)-1] = 0xff,
   },
@@ -64,17 +64,15 @@ __attribute__((naked,noreturn))
 static
 void
 idle_start(void) {
-  for(;;)
-    __asm__("sti; hlt");
+    __asm__("1: sti; hlt; jmp 1b");
 }
 
-__attribute__((naked,noipa))
+__attribute__((naked))
 static
 void
 load_gdt(void) {
   __asm__("lgdt %0" : : "m"(gdtr));
-  __asm__ goto ("ljmpl $%c0, $%l1": : "i"(KERNEL_CS) : "memory" : next);
- next:
+  __asm__ ("ljmpl $%c0, $1f; 1:": : "i"(KERNEL_CS) : "memory");
   __asm__("mov %w0, %%ss" : : "r"(KERNEL_SS));
   __asm__("mov %w0, %%ds; mov %w0, %%es; mov %w0, %%fs; mov %w0, %%gs" : : "r"(USER_SS));
   __asm__("ret");
@@ -98,8 +96,8 @@ task_init(void) {
 
   idle.id = next_id++;
   idle.pml2 = page_table;
-  idle.jmp_buf[ESP] = TASK_ESP0;
-  idle.jmp_buf[EIP] = (uintptr_t)idle_start;
+  idle.jmp_buf[ESP] = (void*)TASK_ESP0;
+  idle.jmp_buf[EIP] = (void*)idle_start;
   list_init(&idle.task_node);
   current = &idle;
 }
@@ -134,8 +132,8 @@ task_create(size_t size __attribute__((unused)), char const *data) {
     return (uintptr_t)-1;
   task->id = id;
   task->pml2 = page_table;
-  task->jmp_buf[ESP] = TASK_ESP0;
-  task->jmp_buf[EIP] = (uintptr_t)user_start;
+  task->jmp_buf[ESP] = (void*)TASK_ESP0;
+  task->jmp_buf[EIP] = (void*)user_start;
   task_enqueue(task);
   return id;
 }
@@ -157,15 +155,25 @@ task_yield() {
     task_switch();
 }
 
+// Clang do not allow __builtin_longjmp in naked function
 static
-__attribute__((noipa,naked,fastcall))
 void
-resume(uintptr_t pa) {
-  __asm__("mov %0, %%cr3" : : "a"(pa));
+longjmp(void) {
   __builtin_longjmp(current->jmp_buf, 1);
 }
 
-__attribute__((noipa,naked))
+static char _jump_stack[256] __attribute__((aligned(16)));
+
+static
+__attribute__((noinline,naked,fastcall))
+void
+resume(uintptr_t pa) {
+  // pass first argument in ecx
+  __asm__("mov %ecx, %cr3");
+  __asm__("mov %0, %%esp" : : "r"(_jump_stack+sizeof(_jump_stack)));
+  __asm__("call %c0" : : "i"(longjmp));
+}
+
 void
 task_switch() {
   struct node *node = current->task_node.next;

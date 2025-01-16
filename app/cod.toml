@@ -1,0 +1,7 @@
+[package]
+name = "app"
+version = "1.0"
+arch = ["i686"]
+
+[build]
+cflags = ["-fno-pie", "-mgeneral-regs-only", "-fno-stack-protector", "-fno-builtin", "-ffreestanding", "-std=c11"]

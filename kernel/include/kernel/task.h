@@ -18,7 +18,7 @@
 struct task {
   uintptr_t id;
   uintptr_t *pml2;
-  uintptr_t jmp_buf[5];
+  void *jmp_buf[5];
   struct node task_node;
   uintptr_t wakeup;
   struct node timer_node;

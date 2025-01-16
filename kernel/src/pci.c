@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <x86/io.h>
 #include <pci.h>
 

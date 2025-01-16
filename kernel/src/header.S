@@ -1,14 +1,17 @@
-#include <asm/boot.h>
-#include <asm/bootparam.h>
-#include <asm/processor-flags.h>
 #include <x86/page.h>
 #include <setup/header.h>
+#define ASK_VGA 0xfffd
+#define LOADED_HIGH 1
+#define XLF_KERNEL_64 1
+#define X86_CR0_PE (1<<0)
+#define X86_CR0_PG (1<<31)
+#define X86_CR4_PSE (1<<4)
 
 #define PA_FROM_VA(x) (((x)-code32_start)+CODE32_START)
 
         .code16gcc
         .globl setup_header
-        .text
+        .section ".header", "ax"
 base:
         // https://www.kernel.org/doc/html/latest/arch/x86/boot.html
         .fill 0x1F1, 1, 0
@@ -117,7 +120,7 @@ start:
         movl    %eax, %cr0
         ljmpl   $(KERNEL_CS), $setup_start
 
-        .data
+        .section ".header.data"
         .align  0x1000
 code32_start:
         .align  0x1000
