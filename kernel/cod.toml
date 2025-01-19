@@ -1,0 +1,14 @@
+[package]
+name = "kernel"
+version = "1.0"
+arch = ["x86_64"]
+
+[export.noarch]
+cflags = ["-fno-pie", "-fno-pic", "-mgeneral-regs-only", "-fno-stack-protector", "-fcf-protection=none", "-mno-red-zone", "-std=c11", "-nostdinc", "-fno-builtin"]
+
+[export.x86_64]
+cflags = ["-mcmodel=large"]
+
+[build]
+linker-script = "linker.ld"
+format = "binary"

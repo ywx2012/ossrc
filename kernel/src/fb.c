@@ -1,4 +1,4 @@
-#include <sys/io.h>
+#include <x86/io.h>
 #include <pci.h>
 #include <kernel/bsp.h>
 #include <kernel/paging.h>

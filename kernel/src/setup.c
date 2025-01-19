@@ -1,3 +1,5 @@
+#pragma clang section text=".setup.text" rodata=".setup.rodata" data=".setup.data" bss=".setup.bss"
+
 #include <setup/setup.h>
 #include <setup/header.h>
 #include <kernel/bsp.h>
@@ -83,7 +85,6 @@ remove_region(uintptr_t start, uintptr_t end) {
   }
 }
 
-__attribute__((noipa))
 static
 void
 setup_main(void) {
@@ -112,5 +113,5 @@ setup_start(void) {
   __asm__("mov %w0, %%ss; mov %w0, %%ds; mov %w0, %%es; mov %w0, %%fs; mov %w0, %%gs"
           : : "r"(KERNEL_SS));
   __asm__("mov %0, %%rsp" : : "r"(bsp_stack + sizeof(bsp_stack)));
-  setup_main();
+  __asm__("call %c0" : : "i"(setup_main));
 }

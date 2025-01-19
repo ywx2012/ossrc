@@ -1,15 +1,21 @@
-#include <asm/boot.h>
-#include <asm/bootparam.h>
-#include <asm/processor-flags.h>
-#include <x86/msr.h>
 #include <x86/page.h>
 #include <setup/header.h>
+#define ASK_VGA 0xfffd
+#define LOADED_HIGH 1
+#define XLF_KERNEL_64 1
+#define X86_CR0_PE (1<<0)
+#define X86_CR0_PG (1<<31)
+#define X86_CR4_PSE (1<<4)
+#define X86_CR4_PAE (1<<5)
+#define MSR_EFER 0xc0000080
+#define MSR_EFER_SCE 0x0000000000000101
+#define MSR_EFER_LME 0x0000000000000100
 
 #define PA_FROM_VA(x) (((x)-code32_start)+CODE32_START)
 
-        .code16gcc
+        .code16
         .globl setup_header
-        .text
+        .section ".header.text", "ax"
 base:
         // https://www.kernel.org/doc/html/latest/arch/x86/boot.html
         .fill 0x1F1, 1, 0
@@ -103,10 +109,10 @@ start:
         out     %ax,    %dx
 
         pushl   $(e820map-base)
-        call    bios_load_map
+        calll   bios_load_map
 
         pushl   $(font_data-base)
-        call    bios_load_font
+        calll   bios_load_font
 
         lgdt    gdtr-base
         movl    $(X86_CR4_PSE|X86_CR4_PAE), %eax
@@ -123,7 +129,7 @@ start:
         movl    %eax, %cr0
         ljmpl   $(KERNEL_CS), $setup_start
 
-        .data
+        .section ".header.data"
         .align  0x1000
 code32_start:
 pml3:

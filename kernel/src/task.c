@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
+#include <kernel/string.h>
 #include <x86/msr.h>
 #include <x86/segment.h>
 #include <kernel/task.h>
@@ -28,7 +27,7 @@ static struct dtr gdtr __attribute__((aligned(16))) = {
 
 static struct tss tss = {
   .rsp = { [0] = TASK_RSP0 },
-  .io_base = offsetof(struct tss, iomap),
+  .io_base = __builtin_offsetof(struct tss, iomap),
   .iomap = {
     [sizeof(tss.iomap)-1] = 0xff,
   },
@@ -74,11 +73,10 @@ __attribute__((naked,noreturn))
 static
 void
 idle_start(void) {
-  for(;;)
-    __asm__("sti; hlt");
+    __asm__("1: sti; hlt; jmp 1b");
 }
 
-__attribute__((naked,noipa))
+__attribute__((naked))
 static
 void
 load_gdt(void) {
@@ -112,8 +110,8 @@ task_init(void) {
 
   idle.id = next_id++;
   idle.pml4 = page_table;
-  idle.jmp_buf[RSP] = TASK_RSP0;
-  idle.jmp_buf[RIP] = (uintptr_t)idle_start;
+  idle.jmp_buf[RSP] = (void *)TASK_RSP0;
+  idle.jmp_buf[RIP] = (void *)idle_start;
   list_init(&idle.task_node);
   current = &idle;
 }
@@ -148,8 +146,8 @@ task_create(size_t size __attribute__((unused)), char const *data) {
     return (uintptr_t)-1;
   task->id = id;
   task->pml4 = page_table;
-  task->jmp_buf[RSP] = TASK_RSP0;
-  task->jmp_buf[RIP] = (uintptr_t)user_start;
+  task->jmp_buf[RSP] = (void *)TASK_RSP0;
+  task->jmp_buf[RIP] = (void *)user_start;
   task_enqueue(task);
   return id;
 }
@@ -171,15 +169,25 @@ task_yield() {
     task_switch();
 }
 
+// Clang do not allow __builtin_longjmp in naked function
 static
-__attribute__((noipa,naked))
 void
-resume(uintptr_t pa) {
-  __asm__("mov %0, %%cr3" : : "a"(pa));
+longjmp(void) {
   __builtin_longjmp(current->jmp_buf, 1);
 }
 
-__attribute__((noipa,naked))
+static char _jump_stack[256] __attribute__((aligned(16)));
+
+static
+__attribute__((noinline,naked))
+void
+resume(uintptr_t pa) {
+  // pass first argument in rdi
+  __asm__("mov %rdi, %cr3");
+  __asm__("mov %0, %%rsp" : : "r"(_jump_stack+sizeof(_jump_stack)));
+  __asm__("call %c0" : : "i"(longjmp));
+}
+
 void
 task_switch() {
   struct node *node = current->task_node.next;

@@ -1,6 +1,6 @@
 #include <x86/pic.h>
 #include <x86/pit.h>
-#include <user/timer.h>
+#include <mob/timer.h>
 #include <kernel/bsp.h>
 #include <kernel/task.h>
 #include <kernel/irq.h>

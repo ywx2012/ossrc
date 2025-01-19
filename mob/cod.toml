@@ -1,0 +1,4 @@
+[package]
+name = "mob"
+version = "1.0"
+arch = ["x86_64"]

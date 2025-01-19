@@ -1,7 +1,7 @@
 #pragma once
 
 #include <list.h>
-#include <user/shm.h>
+#include <mob/shm.h>
 
 struct shm {
   char name[8];

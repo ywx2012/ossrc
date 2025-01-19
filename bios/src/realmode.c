@@ -1,3 +1,5 @@
+#pragma clang section text=".boot.text" rodata=".boot.rodata" data=".boot.data" bss=".boot.bss"
+
 #include <bios.h>
 
 void

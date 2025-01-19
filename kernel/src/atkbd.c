@@ -2,9 +2,9 @@
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
 #include <stdint.h>
-#include <sys/io.h>
+#include <x86/io.h>
 #include <x86/pic.h>
-#include <user/print.h>
+#include <mob/print.h>
 #include <kernel/irq.h>
 #include <kernel/bsp.h>
 

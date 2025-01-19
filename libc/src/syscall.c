@@ -1,13 +1,13 @@
-#include <syscall.h>
-#include <timer.h>
-#include <shm.h>
+#include <mob/syscall.h>
+#include <mob/timer.h>
+#include <mob/shm.h>
 
 void main(void);
 
 static
 __attribute__((used, naked, section(".start")))
 void _start(void) {
-  main();
+  __asm__ ("call %c0" : : "i"(main));
 }
 
 int

@@ -1,6 +1,6 @@
-#include <user/syscall.h>
-#include <user/timer.h>
-#include <user/shm.h>
+#include <mob/syscall.h>
+#include <mob/timer.h>
+#include <mob/shm.h>
 #include <kernel/task.h>
 
 int

@@ -2,9 +2,8 @@ SECTIONS {
     . = 0x10000;
     __setup_start = .;
     .setup : AT(0x0) {
-      build/kernel/header.o(.text);
-      build/kernel/realmode.o(.text);
-      build/kernel/setup.o(.text .rodata .rodata.* .data .bss);
+      *(.header.text);
+      *(.boot.* .setup.*);
       FILL(0);
       . = ALIGN(4096);
     }
@@ -15,12 +14,12 @@ SECTIONS {
     . = 0xFFFF800000100000;
     __kernel_start = .;
     .data : AT(ADDR(.data) - __kernel_start + SIZEOF(.setup)) {
-      build/kernel/header.o(.data);
-      *(.data .rodata .rodata.* .ldata);
-      *(.bss);
+      *(.header.data);
+      *(.data .rodata .rodata.* .ldata .lrodata);
+      *(.bss .lbss);
     }
     .text : AT(ADDR(.text) - __kernel_start + SIZEOF(.setup)) {
-      *(.text);
+      *(.text .ltext);
       FILL(0);
       . = ALIGN(4096);
     }

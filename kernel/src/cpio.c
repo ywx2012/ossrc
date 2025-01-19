@@ -1,5 +1,5 @@
 #include <cpio.h>
-#include <string.h>
+#include <kernel/string.h>
 
 static
 size_t

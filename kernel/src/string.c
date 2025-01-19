@@ -1,7 +1,7 @@
 
 // Copyright (c) 2023 Wang Baisheng <baisheng_wang@163.com>, Wang Shenghan. All Rights Reserved.
 
-#include <string.h>
+#include <kernel/string.h>
 
 void *
 memset(void *s, int c, size_t n) {

@@ -1,4 +1,4 @@
-#include <sys/io.h>
+#include <x86/io.h>
 #include <x86/pic.h>
 
 #define A0 1
@@ -76,12 +76,12 @@ pic_disable(unsigned char irq) {
   pic_set_mask(mask, port);
 }
 
-bool
+int
 pic_acknowledge(unsigned char irq) {
   unsigned char port = (irq<8)?IOPORT_PIC0:IOPORT_PIC1;
   unsigned char isr = pic_get_isr(port);
   unsigned char mask = (unsigned char)(1 << (irq % 8));
-  bool is_servicing = (isr&mask)?true:false;
+  int is_servicing = (isr&mask)?1:0;
 
   if (is_servicing)
     pic_eoi(irq % 8, port);

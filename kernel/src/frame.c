@@ -1,4 +1,4 @@
-#include <string.h>
+#include <kernel/string.h>
 #include <kernel/frame.h>
 #include <kernel/bsp.h>
 

@@ -2,6 +2,8 @@
 #include <kernel/task.h>
 #include <kernel/frame.h>
 
+#include <x86/io.h>
+
 char bsp_stack[BSP_STACK_SIZE] __attribute__((aligned(PAGE_SIZE)));
 uintptr_t va_offset;
 
